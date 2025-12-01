@@ -25,14 +25,12 @@
             font-family: 'Courier Prime', monospace;
             overflow-x: hidden;
             perspective: 1000px;
-            /* For 3D Tilt */
         }
 
         .font-inter {
             font-family: 'Inter', sans-serif;
         }
 
-        /* Matrix Canvas */
         #matrix-canvas,
         #matrix-login-canvas {
             position: fixed;
@@ -45,7 +43,6 @@
             pointer-events: none;
         }
 
-        /* Glassmorphism & 3D Tilt */
         .glass-panel {
             background: rgba(10, 10, 10, 0.85);
             backdrop-filter: blur(8px);
@@ -55,13 +52,11 @@
             transition: transform 0.1s ease-out, box-shadow 0.3s ease;
         }
 
-        /* Hover Effects */
         .hover-glow:hover {
             box-shadow: 0 0 15px currentColor;
             transform: translateY(-2px);
         }
 
-        /* Utilities */
         .text-neon-green {
             color: var(--neon-green);
             text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
@@ -98,116 +93,152 @@
             border-color: var(--neon-purple);
         }
 
-        .btn-neon {
-            border: 1px solid currentColor;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            background: rgba(0, 0, 0, 0.5);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn-neon::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-            transition: 0.5s;
-        }
-
-        .btn-neon:hover::before {
-            left: 100%;
+        .progress-bar {
+            transition: width 1s ease-in-out;
         }
 
         .table-row-hover:hover {
-            background-color: rgba(255, 255, 255, 0.05);
-            transform: scale(1.005);
-            transition: all 0.2s;
+            background: rgba(255, 255, 255, 0.03);
         }
 
-        /* Progress Bar Animation */
-        @keyframes loadProgress {
-            from {
-                width: 0;
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0a0a0a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        .glitch {
+            position: relative;
+        }
+
+        .glitch::before,
+        .glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .glitch::before {
+            left: 2px;
+            text-shadow: -1px 0 red;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim 5s infinite linear alternate-reverse;
+        }
+
+        .glitch::after {
+            left: -2px;
+            text-shadow: -1px 0 blue;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim2 5s infinite linear alternate-reverse;
+        }
+
+        @keyframes glitch-anim {
+            0% {
+                clip: rect(14px, 9999px, 127px, 0);
+            }
+
+            100% {
+                clip: rect(38px, 9999px, 48px, 0);
             }
         }
 
-        .progress-bar {
-            animation: loadProgress 1.5s ease-out forwards;
+        @keyframes glitch-anim2 {
+            0% {
+                clip: rect(65px, 9999px, 100px, 0);
+            }
+
+            100% {
+                clip: rect(12px, 9999px, 68px, 0);
+            }
         }
     </style>
 </head>
 
-<body class="min-h-screen flex flex-col items-center p-4 md:p-8">
+<body class="min-h-screen flex flex-col items-center p-4 sm:p-8">
+    <canvas id="matrix-canvas"></canvas>
 
-    <!-- Login Screen -->
-    <div id="loginScreen" class="fixed inset-0 bg-black z-[100] flex flex-col items-center justify-center">
-        <canvas id="matrix-login-canvas" class="absolute inset-0 opacity-20 pointer-events-none"></canvas>
-
+    <!-- LOGIN SCREEN -->
+    <div id="loginScreen"
+        class="fixed inset-0 z-50 bg-black flex items-center justify-center transition-opacity duration-500">
+        <canvas id="matrix-login-canvas"></canvas>
         <div
-            class="glass-panel p-10 rounded-lg w-96 border border-green-900 shadow-[0_0_50px_rgba(0,255,65,0.1)] relative z-10 flex flex-col items-center">
-            <h1 class="text-4xl font-black text-white tracking-tighter mb-2 font-inter glitch-text"
-                style="text-shadow: 2px 2px 0px #00ff41;">LKL XIT LIOS</h1>
-            <p class="text-green-600 text-xs tracking-[0.3em] font-bold uppercase mb-8">System Access</p>
-
-            <div class="w-full space-y-4">
-                <div>
-                    <label class="block text-xs text-green-800 mb-1 uppercase font-bold">Usuário</label>
-                    <input type="text" id="loginUser"
-                        class="w-full bg-black/50 border border-gray-800 text-white p-3 text-sm focus:border-green-500 outline-none transition-colors text-center uppercase">
-                </div>
-                <div>
-                    <label class="block text-xs text-green-800 mb-1 uppercase font-bold">Senha</label>
-                    <input type="password" id="loginPass"
-                        class="w-full bg-black/50 border border-gray-800 text-white p-3 text-sm focus:border-green-500 outline-none transition-colors text-center">
-                </div>
-                <button onclick="attemptLogin()"
-                    class="w-full btn-neon text-neon-green py-3 font-bold text-sm hover-glow mt-4">
-                    ENTRAR
-                </button>
-                <p id="loginError" class="text-red-500 text-xs text-center font-bold hidden mt-2">ACESSO NEGADO</p>
+            class="glass-panel p-10 rounded-lg border border-green-900 shadow-[0_0_50px_rgba(0,255,65,0.1)] w-full max-w-md text-center relative overflow-hidden">
+            <div
+                class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-green-500 to-transparent opacity-50">
             </div>
+            <h1 class="text-4xl font-black text-white mb-2 tracking-tighter glitch" data-text="LKL XIT LIOS">LKL XIT
+                LIOS</h1>
+            <p class="text-xs text-green-500 uppercase tracking-[0.3em] mb-8">Acesso Restrito // Nível 4</p>
+
+            <div class="space-y-4">
+                <div class="relative group">
+                    <input type="text" id="loginUser" placeholder="USUÁRIO"
+                        class="w-full bg-black/50 border border-gray-800 text-center text-white p-3 text-sm focus:border-green-500 outline-none transition-colors uppercase tracking-widest font-bold placeholder-gray-700">
+                    <div
+                        class="absolute bottom-0 left-0 w-0 h-[1px] bg-green-500 transition-all duration-300 group-hover:w-full">
+                    </div>
+                </div>
+                <div class="relative group">
+                    <input type="password" id="loginPass" placeholder="SENHA"
+                        class="w-full bg-black/50 border border-gray-800 text-center text-white p-3 text-sm focus:border-green-500 outline-none transition-colors tracking-widest font-bold placeholder-gray-700">
+                    <div
+                        class="absolute bottom-0 left-0 w-0 h-[1px] bg-green-500 transition-all duration-300 group-hover:w-full">
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="attemptLogin()"
+                class="w-full mt-8 bg-green-900/20 border border-green-500 text-green-500 py-3 text-sm font-bold hover:bg-green-500 hover:text-black transition-all duration-300 uppercase tracking-widest hover:shadow-[0_0_20px_rgba(0,255,65,0.4)]">
+                Inicializar Sistema
+            </button>
+
+            <p id="loginError" class="mt-4 text-red-500 text-xs font-bold hidden animate-pulse">ACESSO NEGADO //
+                CREDENCIAIS INVÁLIDAS</p>
         </div>
     </div>
 
-    <!-- Main Content (Hidden by default) -->
-    <div id="mainContent" class="w-full flex flex-col items-center hidden opacity-0 transition-opacity duration-1000">
-
-        <canvas id="matrix-canvas"></canvas>
-
+    <!-- MAIN CONTENT (Hidden by default) -->
+    <div id="mainContent"
+        class="w-full max-w-7xl flex flex-col items-center hidden opacity-0 transition-opacity duration-1000">
         <!-- Header -->
-        <header class="w-full max-w-7xl mb-12 text-center relative z-10">
-            <h1 class="text-5xl md:text-7xl font-black text-white tracking-tighter mb-2 font-inter glitch-text"
-                style="text-shadow: 2px 2px 0px #00ff41, -2px -2px 0px #bc13fe;">LKL XIT LIOS</h1>
-            <p class="text-green-500 text-sm tracking-[0.5em] font-bold uppercase opacity-80">Advanced Client Control
-                System</p>
-            <div class="h-px w-full bg-gradient-to-r from-transparent via-green-900/80 to-transparent mt-8"></div>
-        </header>
-
-        <!-- Control Bar -->
-        <div class="w-full max-w-7xl flex flex-col md:flex-row justify-between items-end mb-8 gap-4 z-10">
-            <div class="text-xs text-gray-500 space-y-1 font-mono">
-                <p>SISTEMA: <span class="text-neon-green font-bold animate-pulse">ONLINE</span></p>
-                <p>DATA: <span id="currentDate">--/--/----</span></p>
+        <header class="w-full max-w-7xl flex justify-between items-center mb-12 z-10">
+            <div>
+                <h1 class="text-5xl md:text-7xl font-black text-white tracking-tighter glitch" data-text="LKL XIT LIOS">
+                    LKL XIT LIOS</h1>
+                <div class="flex items-center gap-2 mt-2">
+                    <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                    <p class="text-xs text-green-500 uppercase tracking-[0.2em]">Sistema Online • <span
+                            id="currentDate"></span></p>
+                </div>
             </div>
             <div class="flex gap-4">
                 <button onclick="openModal('generateModal')"
-                    class="btn-neon text-neon-green px-6 py-3 font-bold text-sm flex items-center gap-2 hover-glow">
-                    <span>+</span> NOVO CLIENTE
+                    class="glass-panel px-6 py-3 text-neon-green border-neon-green hover:bg-green-500 hover:text-black transition font-bold text-sm uppercase tracking-wider hover-glow">
+                    + Novo Cliente
                 </button>
                 <button onclick="openModal('customModal')"
-                    class="btn-neon text-neon-purple px-6 py-3 font-bold text-sm flex items-center gap-2 hover-glow">
-                    <span>#</span> CUSTOM KEY
+                    class="glass-panel px-6 py-3 text-neon-purple border-neon-purple hover:bg-purple-500 hover:text-black transition font-bold text-sm uppercase tracking-wider hover-glow">
+                    + Custom Key
                 </button>
             </div>
-        </div>
+        </header>
 
-        <!-- Status Cards -->
-        <div class="w-full max-w-7xl grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 z-10">
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-7xl mb-12 z-10">
             <!-- Active Card -->
             <div class="glass-panel p-6 rounded relative overflow-hidden border-l-4 border-neon-green tilt-card group">
                 <div
@@ -313,10 +344,9 @@
                 </table>
             </div>
         </div>
+    </div>
 
-    </div> <!-- End Main Content -->
-
-    <!-- New Client Modal -->
+    <!-- Modals -->
     <div id="generateModal"
         class="fixed inset-0 bg-black/95 backdrop-blur-md hidden flex items-center justify-center z-50">
         <div class="glass-panel p-8 rounded w-96 border border-green-900 shadow-[0_0_50px_rgba(0,255,65,0.2)]">
@@ -324,18 +354,15 @@
                 class="text-xl font-bold text-neon-green mb-6 tracking-widest uppercase border-b border-green-900/50 pb-2">
                 Novo Cliente</h2>
             <div class="space-y-4">
-                <div>
-                    <label class="block text-xs text-green-700 mb-1 uppercase font-bold">Nome do Cliente</label>
-                    <input type="text" id="newClientName"
+                <div><label class="block text-xs text-green-700 mb-1 uppercase font-bold">Nome do Cliente</label><input
+                        type="text" id="newClientName"
                         class="w-full bg-black/50 border border-gray-800 text-white p-2 text-sm focus:border-green-500 outline-none transition-colors">
                 </div>
-                <div>
-                    <label class="block text-xs text-green-700 mb-1 uppercase font-bold">Whatsapp (Opcional)</label>
-                    <input type="text" id="newClientPhone"
+                <div><label class="block text-xs text-green-700 mb-1 uppercase font-bold">Whatsapp
+                        (Opcional)</label><input type="text" id="newClientPhone"
                         class="w-full bg-black/50 border border-gray-800 text-white p-2 text-sm focus:border-green-500 outline-none transition-colors">
                 </div>
-                <div>
-                    <label class="block text-xs text-green-700 mb-1 uppercase font-bold">Duração</label>
+                <div><label class="block text-xs text-green-700 mb-1 uppercase font-bold">Duração</label>
                     <select id="newClientDuration"
                         class="w-full bg-black/50 border border-gray-800 text-white p-2 text-sm focus:border-green-500 outline-none transition-colors">
                         <option value="daily">Diário (24h)</option>
@@ -344,18 +371,15 @@
                         <option value="permanent">Permanente (Vitalício)</option>
                     </select>
                 </div>
-
-                <div class="flex gap-3 pt-4">
-                    <button onclick="createClient()"
-                        class="flex-1 bg-green-900/20 border border-green-500 text-green-500 py-2 text-sm font-bold hover:bg-green-500 hover:text-black transition uppercase">Criar</button>
-                    <button onclick="closeModal('generateModal')"
+                <div class="flex gap-3 pt-4"><button onclick="createClient()"
+                        class="flex-1 bg-green-900/20 border border-green-500 text-green-500 py-2 text-sm font-bold hover:bg-green-500 hover:text-black transition uppercase">Criar</button><button
+                        onclick="closeModal('generateModal')"
                         class="flex-1 border border-gray-800 text-gray-500 py-2 text-sm hover:bg-gray-800 transition uppercase">Cancelar</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Custom Key Modal -->
     <div id="customModal"
         class="fixed inset-0 bg-black/95 backdrop-blur-md hidden flex items-center justify-center z-50">
         <div class="glass-panel p-8 rounded w-96 border border-purple-900 shadow-[0_0_50px_rgba(188,19,254,0.2)]">
@@ -363,18 +387,15 @@
                 class="text-xl font-bold text-neon-purple mb-6 tracking-widest uppercase border-b border-purple-900/50 pb-2">
                 Custom Key</h2>
             <div class="space-y-4">
-                <div>
-                    <label class="block text-xs text-purple-700 mb-1 uppercase font-bold">Usuário (Login)</label>
-                    <input type="text" id="custUser"
+                <div><label class="block text-xs text-purple-700 mb-1 uppercase font-bold">Usuário (Login)</label><input
+                        type="text" id="custUser"
                         class="w-full bg-black/50 border border-gray-800 text-white p-2 text-sm focus:border-purple-500 outline-none transition-colors">
                 </div>
-                <div>
-                    <label class="block text-xs text-purple-700 mb-1 uppercase font-bold">Senha</label>
-                    <input type="text" id="custPass"
+                <div><label class="block text-xs text-purple-700 mb-1 uppercase font-bold">Senha</label><input
+                        type="text" id="custPass"
                         class="w-full bg-black/50 border border-gray-800 text-white p-2 text-sm focus:border-purple-500 outline-none transition-colors">
                 </div>
-                <div>
-                    <label class="block text-xs text-purple-700 mb-1 uppercase font-bold">Duração</label>
+                <div><label class="block text-xs text-purple-700 mb-1 uppercase font-bold">Duração</label>
                     <select id="custDuration"
                         class="w-full bg-black/50 border border-gray-800 text-white p-2 text-sm focus:border-purple-500 outline-none transition-colors">
                         <option value="daily">Diário (24h)</option>
@@ -383,11 +404,9 @@
                         <option value="permanent">Permanente (Vitalício)</option>
                     </select>
                 </div>
-
-                <div class="flex gap-3 pt-4">
-                    <button onclick="createCustomKey()"
-                        class="flex-1 bg-purple-900/20 border border-purple-500 text-purple-500 py-2 text-sm font-bold hover:bg-purple-500 hover:text-black transition uppercase">Injetar</button>
-                    <button onclick="closeModal('customModal')"
+                <div class="flex gap-3 pt-4"><button onclick="createCustomKey()"
+                        class="flex-1 bg-purple-900/20 border border-purple-500 text-purple-500 py-2 text-sm font-bold hover:bg-purple-500 hover:text-black transition uppercase">Injetar</button><button
+                        onclick="closeModal('customModal')"
                         class="flex-1 border border-gray-800 text-gray-500 py-2 text-sm hover:bg-gray-800 transition uppercase">Cancelar</button>
                 </div>
             </div>
@@ -395,54 +414,40 @@
     </div>
 
     <script>
-        // --- CONFIG ---
         const SUPABASE_URL = 'https://ilwfeyzkaehkfgkxtciq.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlsd2ZleXprYWVoa2Zna3h0Y2lxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ1NDQxNDcsImV4cCI6MjA4MDEyMDE0N30.eK5-Ut91eYVmSgE9-v-zsHZ5lQB7xzVaJZyfXK8qhiM';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
         let allLicenses = [];
 
-        // --- INIT ---
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('currentDate').innerText = new Date().toLocaleDateString('pt-BR');
-            initMatrix('matrix-login-canvas'); // Matrix for login screen
-
-            // Add event listener for Enter key on password field
+            initMatrix('matrix-login-canvas');
             document.getElementById('loginPass').addEventListener('keypress', function (event) {
-                if (event.key === 'Enter') {
-                    attemptLogin();
-                }
+                if (event.key === 'Enter') attemptLogin();
             });
         });
 
         function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
-        // --- AUTHENTICATION ---
         function attemptLogin() {
             const user = document.getElementById('loginUser').value.trim();
             const pass = document.getElementById('loginPass').value.trim();
             const errorMsg = document.getElementById('loginError');
-
-            // Hardcoded Credentials
             const creds = [
                 { u: 'King', p: 'Rtydfgxc5202@' },
-                { u: 'Lee', p: 'Lee53k' }
+                { u: 'Lee', p: 'Lee53k' },
+                { u: 'Leon', p: 'Leon5202' }
             ];
-
             const isValid = creds.some(c => c.u.toLowerCase() === user.toLowerCase() && c.p === pass);
-
             if (isValid) {
                 document.getElementById('loginScreen').style.opacity = '0';
                 setTimeout(() => {
                     document.getElementById('loginScreen').classList.add('hidden');
                     const main = document.getElementById('mainContent');
                     main.classList.remove('hidden');
-                    // Trigger reflow
                     void main.offsetWidth;
                     main.style.opacity = '1';
-
-                    // Initialize main content features after login
                     fetchLicenses();
                     initMatrix('matrix-canvas');
                     initTilt();
@@ -453,25 +458,21 @@
             }
         }
 
-        // --- MATRIX RAIN ---
         function initMatrix(canvasId) {
             const canvas = document.getElementById(canvasId);
             if (!canvas) return;
             const ctx = canvas.getContext('2d');
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-
             const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZLKLXITLIOS';
             const fontSize = 14;
             const columns = canvas.width / fontSize;
             const drops = Array(Math.floor(columns)).fill(1);
-
             function draw() {
                 ctx.fillStyle = 'rgba(5, 5, 5, 0.05)';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 ctx.fillStyle = '#0F0';
                 ctx.font = fontSize + 'px monospace';
-
                 for (let i = 0; i < drops.length; i++) {
                     const text = chars.charAt(Math.floor(Math.random() * chars.length));
                     ctx.fillText(text, i * fontSize, drops[i] * fontSize);
@@ -480,24 +481,19 @@
                 }
             }
             setInterval(draw, 33);
-            window.addEventListener('resize', () => {
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
-            });
+            window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
         }
 
-        // --- 3D TILT ---
         function initTilt() {
             document.addEventListener('mousemove', (e) => {
                 document.querySelectorAll('.tilt-card').forEach(card => {
                     const rect = card.getBoundingClientRect();
                     const x = e.clientX - rect.left;
                     const y = e.clientY - rect.top;
-
                     if (x >= 0 && x <= rect.width && y >= 0 && y <= rect.height) {
                         const centerX = rect.width / 2;
                         const centerY = rect.height / 2;
-                        const rotateX = ((y - centerY) / centerY) * -4; // Max deg
+                        const rotateX = ((y - centerY) / centerY) * -4;
                         const rotateY = ((x - centerX) / centerX) * 4;
                         card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
                     } else {
@@ -507,17 +503,9 @@
             });
         }
 
-        // --- CORE FUNCTIONS ---
         async function fetchLicenses() {
-            const { data, error } = await supabaseClient
-                .from('licenses')
-                .select('*')
-                .order('created_at', { ascending: false });
-
-            if (error) {
-                console.error('Erro:', error);
-                return;
-            }
+            const { data, error } = await supabaseClient.from('licenses').select('*').order('created_at', { ascending: false });
+            if (error) { console.error('Erro:', error); return; }
             allLicenses = data;
             renderTable(data);
             updateStats(data);
@@ -526,28 +514,22 @@
         function renderTable(data) {
             const tbody = document.getElementById('licenseTableBody');
             tbody.innerHTML = '';
-
             if (data.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="6" class="p-12 text-center text-gray-700 uppercase text-xs tracking-widest">Nenhum dado encontrado no sistema</td></tr>';
                 return;
             }
-
             data.forEach(lic => {
                 const tr = document.createElement('tr');
                 tr.className = 'table-row-hover border-b border-gray-800/30 transition-colors cursor-default';
-
                 const expires = new Date(lic.expires_at);
                 const isExpired = new Date() > expires;
                 const dateStr = expires.toLocaleDateString('pt-BR');
-
                 let statusHtml = '';
                 if (lic.status === 'banned') statusHtml = '<span class="text-red-600 font-bold text-xs">BANIDO</span>';
                 else if (isExpired) statusHtml = '<span class="text-red-500 font-bold text-xs">VENCIDO</span>';
                 else statusHtml = '<span class="text-neon-green font-bold text-xs">ATIVO</span>';
-
                 const durationMap = { 'daily': 'Diário', 'weekly': 'Semanal', 'monthly': 'Mensal', 'permanent': 'Permanente' };
                 const planLabel = durationMap[lic.duration_type] || lic.duration_type;
-
                 tr.innerHTML = `
                     <td class="p-4">${statusHtml}</td>
                     <td class="p-4 font-bold text-white">${lic.client_username || '---'}</td>
@@ -555,14 +537,9 @@
                     <td class="p-4 text-xs uppercase text-blue-400">${planLabel}</td>
                     <td class="p-4 text-xs font-mono text-gray-500">${dateStr}</td>
                     <td class="p-4 text-right">
-                        <button onclick="copyKey('${lic.license_key}')" class="text-gray-600 hover:text-white mr-3 transition" title="Copiar Key">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                        </button>
-                        <button onclick="deleteKey('${lic.id}')" class="text-red-900 hover:text-red-500 transition" title="Deletar">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                        </button>
-                    </td>
-                `;
+                        <button onclick="copyKey('${lic.license_key}')" class="text-gray-600 hover:text-white mr-3 transition" title="Copiar Key"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg></button>
+                        <button onclick="deleteKey('${lic.id}')" class="text-red-900 hover:text-red-500 transition" title="Deletar"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
+                    </td>`;
                 tbody.appendChild(tr);
             });
         }
@@ -571,23 +548,18 @@
             const active = data.filter(d => d.status === 'active' && new Date() <= new Date(d.expires_at)).length;
             const expired = data.filter(d => d.status === 'expired' || new Date() > new Date(d.expires_at)).length;
             const permanent = data.filter(d => d.duration_type === 'permanent').length;
-
             document.getElementById('statActive').innerText = active;
             document.getElementById('statExpired').innerText = expired;
             document.getElementById('statPermanent').innerText = permanent;
         }
 
-        // --- ACTIONS ---
         async function createClient() {
             const name = document.getElementById('newClientName').value;
             const phone = document.getElementById('newClientPhone').value;
             const duration = document.getElementById('newClientDuration').value;
-
             if (!name) return alert('Nome é obrigatório');
-
             const randomStr = Math.random().toString(36).substring(2, 8).toUpperCase();
             const key = `AK7-${randomStr}`;
-
             await insertLicense(key, name, null, phone, duration);
             closeModal('generateModal');
             document.getElementById('newClientName').value = '';
@@ -598,12 +570,9 @@
             const user = document.getElementById('custUser').value;
             const pass = document.getElementById('custPass').value;
             const duration = document.getElementById('custDuration').value;
-
             if (!user || !pass) return alert('Usuário e Senha são obrigatórios');
-
             const randomStr = Math.random().toString(36).substring(2, 6).toUpperCase();
             const key = `LKL-CUST-${randomStr}`;
-
             await insertLicense(key, user, pass, null, duration);
             closeModal('customModal');
             document.getElementById('custUser').value = '';
@@ -617,17 +586,9 @@
             if (duration === 'weekly') expires.setDate(now.getDate() + 7);
             if (duration === 'monthly') expires.setDate(now.getDate() + 30);
             if (duration === 'permanent') expires.setFullYear(now.getFullYear() + 100);
-
             const { error } = await supabaseClient.from('licenses').insert({
-                license_key: key,
-                client_username: user,
-                client_password: pass,
-                whatsapp: phone,
-                status: 'active',
-                duration_type: duration,
-                expires_at: expires.toISOString()
+                license_key: key, client_username: user, client_password: pass, whatsapp: phone, status: 'active', duration_type: duration, expires_at: expires.toISOString()
             });
-
             if (error) alert('Erro ao criar: ' + error.message);
             else fetchLicenses();
         }
@@ -642,7 +603,6 @@
             navigator.clipboard.writeText(key).then(() => alert('Key copiada: ' + key));
         }
 
-        // --- FILTERS ---
         function filterTable() {
             const term = document.getElementById('searchInput').value.toLowerCase();
             const filtered = allLicenses.filter(lic =>
@@ -654,13 +614,9 @@
         }
 
         function filterStatus(type) {
-            if (type === 'all') {
-                renderTable(allLicenses);
-            } else if (type === 'monthly') {
-                renderTable(allLicenses.filter(l => l.duration_type === 'monthly'));
-            } else if (type === 'permanent') {
-                renderTable(allLicenses.filter(l => l.duration_type === 'permanent'));
-            }
+            if (type === 'all') renderTable(allLicenses);
+            else if (type === 'monthly') renderTable(allLicenses.filter(l => l.duration_type === 'monthly'));
+            else if (type === 'permanent') renderTable(allLicenses.filter(l => l.duration_type === 'permanent'));
         }
     </script>
 </body>
