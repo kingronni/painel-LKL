@@ -4,174 +4,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LKL - Licensing Kernel Login</title>
+    <title>AK7MOD - Client Control System</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Inter:wght@400;600;800&display=swap"
+        rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700&display=swap');
-
         :root {
             --neon-green: #00ff41;
-            --neon-purple: #bc13fe;
-            --bg-dark: #050505;
+            --neon-red: #ff003c;
+            --neon-blue: #0088ff;
+            --bg-black: #050505;
+            --card-bg: #0a0a0a;
         }
 
         body {
-            font-family: 'JetBrains Mono', monospace;
-            background-color: var(--bg-dark);
-            color: #e5e5e5;
+            background-color: var(--bg-black);
+            color: #e0e0e0;
+            font-family: 'Courier Prime', monospace;
             overflow-x: hidden;
-            perspective: 1000px;
         }
 
-        /* --- BACKGROUND FX --- */
-        #matrix-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            opacity: 0.15;
+        .font-inter {
+            font-family: 'Inter', sans-serif;
         }
 
-        /* --- GLASSMORPHISM & 3D --- */
-        .glass-panel {
-            background: rgba(10, 10, 10, 0.7);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.7);
-            transition: transform 0.1s ease, box-shadow 0.3s ease;
-            transform-style: preserve-3d;
-        }
-
-        .tilt-card:hover {
-            border-color: rgba(0, 255, 65, 0.3);
-            box-shadow: 0 0 20px rgba(0, 255, 65, 0.1);
-        }
-
-        /* --- GLITCH EFFECT --- */
-        .glitch-text {
-            position: relative;
-        }
-
-        .glitch-text::before,
-        .glitch-text::after {
-            content: attr(data-text);
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--bg-dark);
-        }
-
-        .glitch-text::before {
-            left: 2px;
-            text-shadow: -1px 0 #ff00c1;
-            clip: rect(44px, 450px, 56px, 0);
-            animation: glitch-anim 5s infinite linear alternate-reverse;
-        }
-
-        .glitch-text::after {
-            left: -2px;
-            text-shadow: -1px 0 #00fff9;
-            clip: rect(44px, 450px, 56px, 0);
-            animation: glitch-anim2 5s infinite linear alternate-reverse;
-        }
-
-        @keyframes glitch-anim {
-            0% {
-                clip: rect(38px, 9999px, 84px, 0);
-            }
-
-            20% {
-                clip: rect(10px, 9999px, 96px, 0);
-            }
-
-            40% {
-                clip: rect(55px, 9999px, 16px, 0);
-            }
-
-            60% {
-                clip: rect(86px, 9999px, 3px, 0);
-            }
-
-            80% {
-                clip: rect(12px, 9999px, 69px, 0);
-            }
-
-            100% {
-                clip: rect(48px, 9999px, 92px, 0);
-            }
-        }
-
-        @keyframes glitch-anim2 {
-            0% {
-                clip: rect(65px, 9999px, 100px, 0);
-            }
-
-            20% {
-                clip: rect(2px, 9999px, 15px, 0);
-            }
-
-            40% {
-                clip: rect(89px, 9999px, 36px, 0);
-            }
-
-            60% {
-                clip: rect(23px, 9999px, 72px, 0);
-            }
-
-            80% {
-                clip: rect(46px, 9999px, 5px, 0);
-            }
-
-            100% {
-                clip: rect(10px, 9999px, 83px, 0);
-            }
-        }
-
-        /* --- NEON UTILS --- */
-        .neon-green {
-            color: var(--neon-green);
-            text-shadow: 0 0 10px rgba(0, 255, 65, 0.6);
-        }
-
-        .neon-purple {
-            color: var(--neon-purple);
-            text-shadow: 0 0 10px rgba(188, 19, 254, 0.6);
-        }
-
-        .btn-cyber {
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s;
-            clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%);
-        }
-
-        .btn-cyber:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 0 15px var(--neon-green);
-        }
-
-        .btn-cyber-purple:hover {
-            box-shadow: 0 0 15px var(--neon-purple);
-        }
-
-        /* --- TABLE STYLING --- */
-        tr {
-            transition: all 0.2s;
-        }
-
-        tr:hover {
-            background: rgba(255, 255, 255, 0.03);
-            transform: scale(1.005);
-        }
-
-        /* Scrollbar */
+        /* Custom Scrollbar */
         ::-webkit-scrollbar {
-            width: 6px;
+            width: 8px;
         }
 
         ::-webkit-scrollbar-track {
@@ -180,457 +41,400 @@
 
         ::-webkit-scrollbar-thumb {
             background: #333;
-            border-radius: 3px;
+            border-radius: 4px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* Utilities */
+        .text-neon-green {
+            color: var(--neon-green);
+            text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
+        }
+
+        .text-neon-red {
+            color: var(--neon-red);
+            text-shadow: 0 0 5px rgba(255, 0, 60, 0.5);
+        }
+
+        .text-neon-blue {
+            color: var(--neon-blue);
+            text-shadow: 0 0 5px rgba(0, 136, 255, 0.5);
+        }
+
+        .border-neon-green {
+            border-color: var(--neon-green);
+            box-shadow: 0 0 5px rgba(0, 255, 65, 0.2);
+        }
+
+        .border-neon-red {
+            border-color: var(--neon-red);
+            box-shadow: 0 0 5px rgba(255, 0, 60, 0.2);
+        }
+
+        .border-neon-blue {
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 5px rgba(0, 136, 255, 0.2);
+        }
+
+        .btn-neon {
+            border: 1px solid var(--neon-green);
+            color: var(--neon-green);
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            background: transparent;
+        }
+
+        .btn-neon:hover {
             background: var(--neon-green);
+            color: #000;
+            box-shadow: 0 0 15px var(--neon-green);
+        }
+
+        .glass-panel {
+            background: rgba(10, 10, 10, 0.8);
+            backdrop-filter: blur(5px);
+            border: 1px solid #222;
+        }
+
+        .table-row-hover:hover {
+            background-color: rgba(255, 255, 255, 0.03);
+        }
+
+        /* Progress Bar Animation */
+        @keyframes loadProgress {
+            from {
+                width: 0;
+            }
+        }
+
+        .progress-bar {
+            animation: loadProgress 1.5s ease-out forwards;
         }
     </style>
 </head>
 
-<body class="min-h-screen flex flex-col items-center relative selection:bg-[#00ff41] selection:text-black">
-
-    <canvas id="matrix-canvas"></canvas>
+<body class="min-h-screen flex flex-col items-center p-4 md:p-8">
 
     <!-- Header -->
-    <header
-        class="w-full max-w-7xl mt-10 mb-8 flex justify-between items-center glass-panel p-8 rounded-xl tilt-card z-10">
-        <div>
-            <h1 class="text-5xl font-bold text-white tracking-tighter glitch-text" data-text="LKL // KERNEL">LKL <span
-                    class="text-lg text-gray-400 font-normal opacity-70">// KERNEL</span></h1>
-            <div class="flex items-center gap-2 mt-2">
-                <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <p class="text-xs text-green-500 tracking-[0.2em] uppercase">Sistema Online • Conexão Segura</p>
-            </div>
-        </div>
-        <div class="flex gap-4">
-            <button onclick="openModal('generateModal')"
-                class="btn-cyber px-8 py-3 bg-black border border-[#00ff41] text-[#00ff41] font-bold text-sm uppercase tracking-widest hover:bg-[#00ff41] hover:text-black">
-                [+] GERAR KEY
-            </button>
-            <button onclick="openModal('customModal')"
-                class="btn-cyber btn-cyber-purple px-8 py-3 bg-black border border-[#bc13fe] text-[#bc13fe] font-bold text-sm uppercase tracking-widest hover:bg-[#bc13fe] hover:text-black">
-                [#] CRIAR CUSTOM
-            </button>
-        </div>
+    <header class="w-full max-w-7xl mb-12 text-center relative">
+        <h1 class="text-5xl md:text-6xl font-black text-white tracking-tighter mb-2 font-inter">AK7MOD</h1>
+        <p class="text-green-900 text-sm tracking-[0.5em] font-bold uppercase">Client Control System</p>
+        <div class="h-px w-full bg-gradient-to-r from-transparent via-green-900/50 to-transparent mt-8"></div>
     </header>
 
-    <!-- Stats Row -->
-    <div class="w-full max-w-7xl grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 z-10">
-        <div class="glass-panel p-6 rounded-xl tilt-card border-l-2 border-[#00ff41] relative overflow-hidden group">
-            <div
-                class="absolute -right-4 -top-4 text-8xl text-[#00ff41] opacity-5 rotate-12 group-hover:rotate-0 transition-transform">
-                K</div>
-            <h3 class="text-gray-500 text-xs uppercase tracking-widest mb-1">Total de Licenças</h3>
-            <p id="statTotal" class="text-4xl font-bold neon-green">0</p>
+    <!-- Control Bar -->
+    <div class="w-full max-w-7xl flex flex-col md:flex-row justify-between items-end mb-8 gap-4">
+        <div class="text-xs text-gray-500 space-y-1">
+            <p>SISTEMA: <span class="text-neon-green font-bold">ONLINE</span></p>
+            <p>DATA: <span id="currentDate">--/--/----</span></p>
         </div>
-        <div class="glass-panel p-6 rounded-xl tilt-card border-l-2 border-[#bc13fe] relative overflow-hidden group">
-            <div
-                class="absolute -right-4 -top-4 text-8xl text-[#bc13fe] opacity-5 rotate-12 group-hover:rotate-0 transition-transform">
-                A</div>
-            <h3 class="text-gray-500 text-xs uppercase tracking-widest mb-1">Usuários Ativos</h3>
-            <p id="statActive" class="text-4xl font-bold neon-purple">0</p>
+        <button onclick="openModal('generateModal')"
+            class="btn-neon px-6 py-3 font-bold text-sm flex items-center gap-2">
+            <span>+</span> NOVO CLIENTE
+        </button>
+    </div>
+
+    <!-- Status Cards -->
+    <div class="w-full max-w-7xl grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        <!-- Active Card -->
+        <div class="glass-panel p-6 rounded relative overflow-hidden border-l-2 border-neon-green">
+            <div class="flex justify-between items-start mb-4">
+                <h3 class="text-gray-400 text-xs uppercase tracking-widest">Ativos</h3>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-900" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+            </div>
+            <p id="statActive" class="text-4xl font-bold text-neon-green mb-4">0</p>
+            <div class="w-full h-1 bg-gray-900 rounded-full overflow-hidden">
+                <div class="h-full bg-green-600 progress-bar" style="width: 70%"></div>
+            </div>
         </div>
-        <div class="glass-panel p-6 rounded-xl tilt-card border-l-2 border-red-500 relative overflow-hidden group">
-            <div
-                class="absolute -right-4 -top-4 text-8xl text-red-500 opacity-5 rotate-12 group-hover:rotate-0 transition-transform">
-                B</div>
-            <!-- Main Table -->
-            <main class="w-full max-w-7xl glass-panel rounded-xl overflow-hidden tilt-card z-10 mb-20">
-                <div class="p-4 border-b border-gray-800 flex justify-between items-center bg-black/20">
-                    <h2 class="text-sm font-bold text-gray-400 uppercase tracking-widest">Banco de Dados // Licenças
-                    </h2>
-                    <div class="flex gap-2">
-                        <span class="w-3 h-3 rounded-full bg-red-500/20 border border-red-500"></span>
-                        <span class="w-3 h-3 rounded-full bg-yellow-500/20 border border-yellow-500"></span>
-                        <span class="w-3 h-3 rounded-full bg-green-500/20 border border-green-500"></span>
-                    </div>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="text-gray-500 text-xs uppercase tracking-wider border-b border-gray-800">
-                                <th class="p-5 font-normal">Chave (Key)</th>
-                                <th class="p-5 font-normal">Usuário</th>
-                                <th class="p-5 font-normal">Segurança</th>
-                                <th class="p-5 font-normal">Plano</th>
-                                <th class="p-5 font-normal">Expiração</th>
-                                <th class="p-5 font-normal">HWID/IP Lock</th>
-                                <th class="p-5 font-normal">Status</th>
-                                <th class="p-5 font-normal text-right">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="licenseTableBody" class="text-sm text-gray-300 divide-y divide-gray-800/50">
-                            <tr>
-                                <td colspan="8" class="p-12 text-center text-gray-600 animate-pulse">
-                                    Conectando ao mainframe criptografado...
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </main>
 
-            <!-- Modals (Reused Logic, New Style) -->
-            <div id="generateModal"
-                class="fixed inset-0 bg-black/90 backdrop-blur-md hidden flex items-center justify-center z-50 transition-opacity duration-300">
-                <div
-                    class="glass-panel p-8 rounded-xl w-96 border border-[#00ff41] shadow-[0_0_50px_rgba(0,255,65,0.2)] transform scale-100 transition-transform">
-                    <h2 class="text-2xl font-bold neon-green mb-8 tracking-tighter">GERAR LICENÇA</h2>
-                    <div class="space-y-6">
-                        <div>
-                            <label class="block text-xs text-[#00ff41] mb-2 uppercase tracking-widest">Ciclo de
-                                Duração</label>
-                            <select id="genDuration"
-                                class="w-full bg-black/50 border border-gray-700 text-white p-3 rounded focus:border-[#00ff41] focus:shadow-[0_0_10px_rgba(0,255,65,0.3)] outline-none transition-all">
-                                <option value="daily">Diário (24h)</option>
-                                <option value="weekly">Semanal (7d)</option>
-                                <option value="monthly">Mensal (30d)</option>
-                                <option value="permanent">Vitalício (Lifetime)</option>
-                            </select>
-                        </div>
-                        <div class="flex gap-3 pt-4">
-                            <button onclick="generateKey()"
-                                class="flex-1 bg-[#00ff41] text-black font-bold py-3 hover:bg-[#33ff66] transition clip-path-btn">EXECUTAR</button>
-                            <button onclick="closeModal('generateModal')"
-                                class="flex-1 border border-gray-700 text-gray-400 py-3 hover:bg-gray-800 transition">ABORTAR</button>
-                        </div>
-                    </div>
+        <!-- Expired Card -->
+        <div class="glass-panel p-6 rounded relative overflow-hidden border-l-2 border-neon-red">
+            <div class="flex justify-between items-start mb-4">
+                <h3 class="text-gray-400 text-xs uppercase tracking-widest">Vencidos</h3>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-900" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+            </div>
+            <p id="statExpired" class="text-4xl font-bold text-neon-red mb-4">0</p>
+            <div class="w-full h-1 bg-gray-900 rounded-full overflow-hidden">
+                <div class="h-full bg-red-600 progress-bar" style="width: 30%"></div>
+            </div>
+        </div>
+
+        <!-- Permanent Card -->
+        <div class="glass-panel p-6 rounded relative overflow-hidden border-l-2 border-neon-blue">
+            <div class="flex justify-between items-start mb-4">
+                <h3 class="text-gray-400 text-xs uppercase tracking-widest">Permanentes</h3>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-900" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <p id="statPermanent" class="text-4xl font-bold text-neon-blue mb-4">0</p>
+            <div class="w-full h-1 bg-gray-900 rounded-full overflow-hidden">
+                <div class="h-full bg-blue-600 progress-bar" style="width: 90%"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search & Filter -->
+    <div
+        class="w-full max-w-7xl glass-panel p-4 mb-8 flex flex-col md:flex-row justify-between items-center gap-4 border border-gray-800">
+        <div class="flex items-center gap-3 w-full md:w-1/3 border-b border-gray-800 pb-2 md:pb-0 md:border-0">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input type="text" id="searchInput" placeholder="BUSCAR ALVO..."
+                class="bg-transparent border-none outline-none text-sm text-gray-300 w-full placeholder-gray-700 uppercase"
+                onkeyup="filterTable()">
+        </div>
+        <div class="flex gap-2">
+            <button onclick="filterStatus('all')"
+                class="px-4 py-1 text-xs border border-green-900 text-green-500 hover:bg-green-900/20 transition uppercase">Todos</button>
+            <button onclick="filterStatus('monthly')"
+                class="px-4 py-1 text-xs border border-gray-800 text-gray-500 hover:bg-gray-800 transition uppercase">Mensal</button>
+            <button onclick="filterStatus('permanent')"
+                class="px-4 py-1 text-xs border border-gray-800 text-gray-500 hover:bg-gray-800 transition uppercase">Permanente</button>
+        </div>
+    </div>
+
+    <!-- Data Table -->
+    <div class="w-full max-w-7xl glass-panel border border-gray-800 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="text-gray-500 text-xs uppercase tracking-wider border-b border-gray-800 bg-black/40">
+                        <th class="p-4 font-bold">Status</th>
+                        <th class="p-4 font-bold">Nome</th>
+                        <th class="p-4 font-bold">Whatsapp</th>
+                        <th class="p-4 font-bold">Plano</th>
+                        <th class="p-4 font-bold">Vencimento</th>
+                        <th class="p-4 font-bold text-right">Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="licenseTableBody" class="text-sm text-gray-400 divide-y divide-gray-800/30">
+                    <!-- Rows will be injected here -->
+                    <tr>
+                        <td colspan="6" class="p-12 text-center text-gray-700 uppercase text-xs tracking-widest">
+                            Nenhum dado encontrado no sistema
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- New Client Modal -->
+    <div id="generateModal"
+        class="fixed inset-0 bg-black/95 backdrop-blur-sm hidden flex items-center justify-center z-50">
+        <div class="glass-panel p-8 rounded w-96 border border-green-900 shadow-[0_0_30px_rgba(0,50,0,0.5)]">
+            <h2
+                class="text-xl font-bold text-neon-green mb-6 tracking-widest uppercase border-b border-green-900/50 pb-2">
+                Novo Cliente</h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs text-green-700 mb-1 uppercase">Nome do Cliente</label>
+                    <input type="text" id="newClientName"
+                        class="w-full bg-black border border-gray-800 text-white p-2 text-sm focus:border-green-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs text-green-700 mb-1 uppercase">Whatsapp (Opcional)</label>
+                    <input type="text" id="newClientPhone"
+                        class="w-full bg-black border border-gray-800 text-white p-2 text-sm focus:border-green-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs text-green-700 mb-1 uppercase">Duração</label>
+                    <select id="newClientDuration"
+                        class="w-full bg-black border border-gray-800 text-white p-2 text-sm focus:border-green-500 outline-none">
+                        <option value="daily">Diário (24h)</option>
+                        <option value="weekly">Semanal (7 Dias)</option>
+                        <option value="monthly">Mensal (30 Dias)</option>
+                        <option value="permanent">Permanente (Vitalício)</option>
+                    </select>
+                </div>
+
+                <div class="flex gap-3 pt-4">
+                    <button onclick="createClient()"
+                        class="flex-1 bg-green-900/20 border border-green-500 text-green-500 py-2 text-sm font-bold hover:bg-green-500 hover:text-black transition uppercase">Criar</button>
+                    <button onclick="closeModal('generateModal')"
+                        class="flex-1 border border-gray-800 text-gray-500 py-2 text-sm hover:bg-gray-800 transition uppercase">Cancelar</button>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <div id="customModal"
-                class="fixed inset-0 bg-black/90 backdrop-blur-md hidden flex items-center justify-center z-50">
-                <div
-                    class="glass-panel p-8 rounded-xl w-96 border border-[#bc13fe] shadow-[0_0_50px_rgba(188,19,254,0.2)]">
-                    <h2 class="text-2xl font-bold neon-purple mb-8 tracking-tighter">INJEÇÃO CUSTOMIZADA</h2>
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-xs text-[#bc13fe] mb-1 uppercase tracking-widest">Usuário
-                                Alvo</label>
-                            <input type="text" id="custUser"
-                                class="w-full bg-black/50 border border-gray-700 text-white p-3 rounded focus:border-[#bc13fe] outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-xs text-[#bc13fe] mb-1 uppercase tracking-widest">Código de Acesso
-                                (Senha)</label>
-                            <input type="text" id="custPass"
-                                class="w-full bg-black/50 border border-gray-700 text-white p-3 rounded focus:border-[#bc13fe] outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-xs text-[#bc13fe] mb-1 uppercase tracking-widest">Duração</label>
-                            <select id="custDuration"
-                                class="w-full bg-black/50 border border-gray-700 text-white p-3 rounded focus:border-[#bc13fe] outline-none">
-                                <option value="daily">Diário</option>
-                                <option value="weekly">Semanal</option>
-                                <option value="monthly">Mensal</option>
-                                <option value="permanent">Vitalício</option>
-                            </select>
-                        </div>
-                        <div class="flex gap-3 pt-4">
-                            <button onclick="createCustomKey()"
-                                class="flex-1 bg-[#bc13fe] text-black font-bold py-3 hover:bg-[#d15aff] transition">INJETAR</button>
-                            <button onclick="closeModal('customModal')"
-                                class="flex-1 border border-gray-700 text-gray-400 py-3 hover:bg-gray-800 transition">ABORTAR</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <script>
+        // --- CONFIG ---
+        const SUPABASE_URL = 'https://ilwfeyzkaehkfgkxtciq.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlsd2ZleXprYWVoa2Zna3h0Y2lxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ1NDQxNDcsImV4cCI6MjA4MDEyMDE0N30.eK5-Ut91eYVmSgE9-v-zsHZ5lQB7xzVaJZyfXK8qhiM';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-            <!-- Test Modal -->
-            <div id="testModal"
-                class="fixed inset-0 bg-black/90 backdrop-blur-md hidden flex items-center justify-center z-50">
-                <div
-                    class="glass-panel p-8 rounded-xl w-96 border border-white shadow-[0_0_30px_rgba(255,255,255,0.1)]">
-                    <h2 class="text-xl font-bold text-white mb-6 tracking-widest">SIMULAÇÃO // LOGIN</h2>
-                    <div class="space-y-4">
-                        <input type="text" id="testKey" placeholder="Chave de Licença..."
-                            class="w-full bg-black/50 border border-gray-700 text-white p-3 rounded outline-none focus:border-white">
-                        <input type="text" id="testIP" placeholder="IP Virtual (ex: 10.0.0.1)" value="10.0.0.1"
-                            class="w-full bg-black/50 border border-gray-700 text-white p-3 rounded outline-none focus:border-white">
+        let allLicenses = [];
 
-                        <div class="flex gap-3 mt-6">
-                            <button onclick="runSimulation()"
-                                class="flex-1 bg-white text-black font-bold py-3 hover:bg-gray-200 transition">CONECTAR</button>
-                            <button onclick="closeModal('testModal')"
-                                class="flex-1 border border-gray-700 text-gray-400 py-3 hover:bg-gray-800 transition">FECHAR</button>
-                        </div>
-                        <div id="simResult" class="text-center text-xs font-mono mt-4 h-6 tracking-wider"></div>
-                    </div>
-                </div>
-            </div>
+        // --- INIT ---
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('currentDate').innerText = new Date().toLocaleDateString('pt-BR');
+            fetchLicenses();
+        });
 
-            <!-- Floating Action -->
-            <button onclick="openModal('testModal')"
-                class="fixed bottom-8 right-8 bg-gray-900 text-white px-6 py-3 rounded-full text-xs font-bold border border-gray-700 hover:border-white hover:bg-black hover:shadow-[0_0_20px_white] transition-all z-40 uppercase tracking-widest">
-                🧪 Sim. Login
-            </button>
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
-            <script>
-                // --- 3D TILT EFFECT LOGIC ---
-                document.addEventListener('mousemove', (e) => {
-                    const cards = document.querySelectorAll('.tilt-card');
-                    cards.forEach(card => {
-                        const rect = card.getBoundingClientRect();
-                        const x = e.clientX - rect.left;
-                        const y = e.clientY - rect.top;
+        // --- CORE FUNCTIONS ---
+        async function fetchLicenses() {
+            const { data, error } = await supabaseClient
+                .from('licenses')
+                .select('*')
+                .order('created_at', { ascending: false });
 
-                        // Only animate if mouse is near/over the element to save performance
-                        if (x > -50 && x < rect.width + 50 && y > -50 && y < rect.height + 50) {
-                            const centerX = rect.width / 2;
-                            const centerY = rect.height / 2;
-                            const rotateX = ((y - centerY) / centerY) * -2; // Max rotation deg
-                            const rotateY = ((x - centerX) / centerX) * 2;
+            if (error) {
+                console.error('Erro:', error);
+                return;
+            }
+            allLicenses = data;
+            renderTable(data);
+            updateStats(data);
+        }
 
-                            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-                        } else {
-                            card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0)';
-                        }
-                    });
-                });
+        function renderTable(data) {
+            const tbody = document.getElementById('licenseTableBody');
+            tbody.innerHTML = '';
 
-                // --- MATRIX RAIN EFFECT ---
-                const canvas = document.getElementById('matrix-canvas');
-                const ctx = canvas.getContext('2d');
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="p-12 text-center text-gray-700 uppercase text-xs tracking-widest">Nenhum dado encontrado no sistema</td></tr>';
+                return;
+            }
 
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
+            data.forEach(lic => {
+                const tr = document.createElement('tr');
+                tr.className = 'table-row-hover border-b border-gray-800/30 transition-colors';
 
-                const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン';
-                const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-                const nums = '0123456789';
-                const alphabet = katakana + latin + nums;
+                const expires = new Date(lic.expires_at);
+                const isExpired = new Date() > expires;
+                const dateStr = expires.toLocaleDateString('pt-BR');
 
-                const fontSize = 16;
-                const columns = canvas.width / fontSize;
+                // Status Logic
+                let statusHtml = '';
+                if (lic.status === 'banned') statusHtml = '<span class="text-red-600 font-bold text-xs">BANIDO</span>';
+                else if (isExpired) statusHtml = '<span class="text-red-500 font-bold text-xs">VENCIDO</span>';
+                else statusHtml = '<span class="text-neon-green font-bold text-xs">ATIVO</span>';
 
-                const rainDrops = [];
-                for (let x = 0; x < columns; x++) {
-                    rainDrops[x] = 1;
-                }
+                // Duration Label
+                const durationMap = { 'daily': 'Diário', 'weekly': 'Semanal', 'monthly': 'Mensal', 'permanent': 'Permanente' };
+                const planLabel = durationMap[lic.duration_type] || lic.duration_type;
 
-                const draw = () => {
-                    ctx.fillStyle = 'rgba(5, 5, 5, 0.05)';
-                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                tr.innerHTML = `
+                    <td class="p-4">${statusHtml}</td>
+                    <td class="p-4 font-bold text-white">${lic.client_username || '---'}</td>
+                    <td class="p-4 text-gray-400 font-mono text-xs">${lic.whatsapp || '---'}</td>
+                    <td class="p-4 text-xs uppercase text-blue-400">${planLabel}</td>
+                    <td class="p-4 text-xs font-mono text-gray-500">${dateStr}</td>
+                    <td class="p-4 text-right">
+                        <button onclick="copyKey('${lic.license_key}')" class="text-gray-600 hover:text-white mr-3" title="Copiar Key">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                        </button>
+                        <button onclick="deleteKey('${lic.id}')" class="text-red-900 hover:text-red-500 transition" title="Deletar">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
 
-                    ctx.fillStyle = '#0F0'; // Green text
-                    ctx.font = fontSize + 'px monospace';
+        function updateStats(data) {
+            const active = data.filter(d => d.status === 'active' && new Date() <= new Date(d.expires_at)).length;
+            const expired = data.filter(d => d.status === 'expired' || new Date() > new Date(d.expires_at)).length;
+            const permanent = data.filter(d => d.duration_type === 'permanent').length;
 
-                    for (let i = 0; i < rainDrops.length; i++) {
-                        const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
-                        ctx.fillText(text, i * fontSize, rainDrops[i] * fontSize);
+            document.getElementById('statActive').innerText = active;
+            document.getElementById('statExpired').innerText = expired;
+            document.getElementById('statPermanent').innerText = permanent;
+        }
 
-                        if (rainDrops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-                            rainDrops[i] = 0;
-                        }
-                        rainDrops[i]++;
-                    }
-                };
+        // --- ACTIONS ---
+        async function createClient() {
+            const name = document.getElementById('newClientName').value;
+            const phone = document.getElementById('newClientPhone').value;
+            const duration = document.getElementById('newClientDuration').value;
 
-                setInterval(draw, 30);
+            if (!name) return alert('Nome é obrigatório');
 
-                window.addEventListener('resize', () => {
-                    canvas.width = window.innerWidth;
-                    canvas.height = window.innerHeight;
-                });
+            const randomStr = Math.random().toString(36).substring(2, 8).toUpperCase();
+            const key = `AK7-${randomStr}`;
 
-                // --- SUPABASE LOGIC ---
-                const SUPABASE_URL = 'https://ilwfeyzkaehkfgkxtciq.supabase.co';
-                const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlsd2ZleXprYWVoa2Zna3h0Y2lxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ1NDQxNDcsImV4cCI6MjA4MDEyMDE0N30.eK5-Ut91eYVmSgE9-v-zsHZ5lQB7xzVaJZyfXK8qhiM';
-                // Renamed to avoid conflict with the global 'supabase' object from the CDN
-                const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            const now = new Date();
+            let expires = new Date();
+            if (duration === 'daily') expires.setDate(now.getDate() + 1);
+            if (duration === 'weekly') expires.setDate(now.getDate() + 7);
+            if (duration === 'monthly') expires.setDate(now.getDate() + 30);
+            if (duration === 'permanent') expires.setFullYear(now.getFullYear() + 100);
 
-                function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
-                function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+            const { error } = await supabaseClient.from('licenses').insert({
+                license_key: key,
+                client_username: name,
+                whatsapp: phone,
+                status: 'active',
+                duration_type: duration,
+                expires_at: expires.toISOString()
+            });
 
-                async function fetchLicenses() {
-                    const { data, error } = await supabaseClient
-                        .from('licenses')
-                        .select('*')
-                        .order('created_at', { ascending: false });
-
-                    if (error) {
-                        console.error('Erro Supabase:', error);
-                        if (error.message.includes('JWT') || error.code === 'PGRST301') {
-                            alert('ERRO DE CONEXÃO: Sua API Key parece inválida. Verifique o console.');
-                        }
-                        return;
-                    }
-                    renderTable(data);
-                    updateStats(data);
-                }
-
-                function renderTable(licenses) {
-                    const tbody = document.getElementById('licenseTableBody');
-                    tbody.innerHTML = '';
-
-                    if (licenses.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="8" class="p-8 text-center text-gray-600">BANCO DE DADOS VAZIO</td></tr>';
-                        return;
-                    }
-
-                    licenses.forEach(lic => {
-                        const tr = document.createElement('tr');
-                        tr.className = 'hover:bg-white/5 transition-colors group border-b border-gray-800/30';
-
-                        const expires = new Date(lic.expires_at).toLocaleDateString('pt-BR');
-                        const isExpired = new Date() > new Date(lic.expires_at);
-                        const statusColor = lic.status === 'active' ? 'text-[#00ff41]' : (lic.status === 'banned' ? 'text-red-500' : 'text-gray-500');
-
-                        tr.innerHTML = `
-                            <td class="p-5 font-mono text-xs text-gray-400 select-all tracking-wider">${lic.license_key}</td>
-                            <td class="p-5 text-white font-bold">${lic.client_username || '<span class="text-gray-700">ANON</span>'}</td>
-                            <td class="p-5 text-gray-600 tracking-widest">••••••</td>
-                            <td class="p-5 capitalize text-gray-400 text-xs border-l border-gray-800/50">${lic.duration_type}</td>
-                            <td class="p-5 ${isExpired ? 'text-red-400' : 'text-gray-300'} font-mono text-xs">${expires}</td>
-                            <td class="p-5 font-mono text-xs ${lic.locked_ip ? 'text-blue-400' : 'text-gray-700'}">${lic.locked_ip || 'DESTRAVADO'}</td>
-                            <td class="p-5 font-bold text-xs uppercase ${statusColor} tracking-wider">${lic.status}</td>
-                            <td class="p-5 text-right">
-                                <button onclick="banKey('${lic.id}')" class="text-red-500 hover:text-red-400 mr-3 text-xs uppercase font-bold tracking-wider hover:underline">[BANIR]</button>
-                                <button onclick="deleteKey('${lic.id}')" class="text-gray-600 hover:text-white text-xs uppercase font-bold tracking-wider hover:underline">[DELETAR]</button>
-                            </td>
-                            `;
-                        tbody.appendChild(tr);
-                    });
-                }
-
-                function updateStats(data) {
-                    document.getElementById('statTotal').innerText = data.length;
-                    document.getElementById('statActive').innerText = data.filter(d => d.status === 'active').length;
-                    document.getElementById('statBanned').innerText = data.filter(d => d.status === 'banned').length;
-                    document.getElementById('statExpired').innerText = data.filter(d => d.status === 'expired' || new Date() > new Date(d.expires_at)).length;
-                }
-
-                async function generateKey() {
-                    try {
-                        const duration = document.getElementById('genDuration').value;
-                        const randomStr = Math.random().toString(36).substring(2, 6) + '-' + Math.random().toString(36).substring(2, 6);
-                        const key = `LKL-${randomStr.toUpperCase()}`;
-
-                        console.log('Tentando gerar key:', key);
-                        await createLicenseInDB(key, null, null, duration);
-                        closeModal('generateModal');
-                    } catch (e) {
-                        alert('Erro inesperado ao gerar: ' + e.message);
-                    }
-                }
-
-                async function createCustomKey() {
-                    const user = document.getElementById('custUser').value;
-                    const pass = document.getElementById('custPass').value;
-                    const duration = document.getElementById('custDuration').value;
-                    const randomStr = Math.random().toString(36).substring(2, 6);
-                    const key = `LKL-CUST-${randomStr.toUpperCase()}`;
-                    if (!user || !pass) return alert('Campos obrigatórios!');
-                    await createLicenseInDB(key, user, pass, duration);
-                    closeModal('customModal');
-                }
-
-                async function createLicenseInDB(key, user, pass, durationType) {
-                    const now = new Date();
-                    let expires = new Date();
-                    if (durationType === 'daily') expires.setDate(now.getDate() + 1);
-                    if (durationType === 'weekly') expires.setDate(now.getDate() + 7);
-                    if (durationType === 'monthly') expires.setDate(now.getDate() + 30);
-                    if (durationType === 'permanent') expires.setFullYear(now.getFullYear() + 100);
-
-                    console.log('Enviando para Supabase...');
-                    const { error } = await supabaseClient.from('licenses').insert({
-                        license_key: key,
-                        client_username: user,
-                        client_password: pass,
-                        status: 'active',
-                        duration_type: durationType,
-                        expires_at: expires.toISOString(),
-                        locked_ip: null
-                    });
-
-                    if (error) {
-                        console.error('Erro no Insert:', error);
-                        alert('Erro ao criar no banco: ' + error.message + '\nVerifique se sua API Key tem permissão de escrita.');
-                    } else {
-                        console.log('Sucesso!');
-                        fetchLicenses();
-                    }
-                }
-
-                async function banKey(id) {
-                    if (!confirm('Confirmar Banimento?')) return;
-                    await supabaseClient.from('licenses').update({ status: 'banned' }).eq('id', id);
-                    fetchLicenses();
-                }
-
-                async function deleteKey(id) {
-                    if (!confirm('Confirmar Exclusão?')) return;
-                    await supabaseClient.from('licenses').delete().eq('id', id);
-                    fetchLicenses();
-                }
-
-                async function simularLogin(key, ipDoUsuario) {
-                    const resultDiv = document.getElementById('simResult');
-                    resultDiv.innerText = 'AUTENTICANDO...';
-                    resultDiv.className = 'text-center text-xs font-mono mt-4 h-6 tracking-wider text-yellow-500 animate-pulse';
-
-                    const { data, error } = await supabaseClient
-                        .from('licenses')
-                        .select('*')
-                        .eq('license_key', key)
-                        .single();
-
-                    if (error || !data) {
-                        resultDiv.innerText = 'ACESSO NEGADO: KEY INVÁLIDA';
-                        resultDiv.className = 'text-center text-xs font-mono mt-4 h-6 tracking-wider text-red-500';
-                        return;
-                    }
-
-                    if (data.status === 'banned') {
-                        resultDiv.innerText = 'ACESSO NEGADO: BANIDO';
-                        resultDiv.className = 'text-center text-xs font-mono mt-4 h-6 tracking-wider text-red-600 font-bold';
-                        return;
-                    }
-
-                    if (new Date() > new Date(data.expires_at)) {
-                        resultDiv.innerText = 'ACESSO NEGADO: EXPIRADO';
-                        resultDiv.className = 'text-center text-xs font-mono mt-4 h-6 tracking-wider text-orange-500';
-                        return;
-                    }
-
-                    if (data.locked_ip === null) {
-                        const { error: updateError } = await supabaseClient
-                            .from('licenses')
-                            .update({ locked_ip: ipDoUsuario, status: 'active' })
-                            .eq('id', data.id);
-
-                        if (updateError) {
-                            resultDiv.innerText = 'ERRO DE BANCO DE DADOS';
-                        } else {
-                            resultDiv.innerText = 'ACESSO PERMITIDO [TRAVADO EM ' + ipDoUsuario + ']';
-                            resultDiv.className = 'text-center text-xs font-mono mt-4 h-6 tracking-wider text-[#00ff41]';
-                            fetchLicenses();
-                        }
-                    } else {
-                        if (data.locked_ip === ipDoUsuario) {
-                            resultDiv.innerText = 'ACESSO PERMITIDO';
-                            resultDiv.className = 'text-center text-xs font-mono mt-4 h-6 tracking-wider text-[#00ff41]';
-                        } else {
-                            resultDiv.innerText = 'ALERTA DE SEGURANÇA: IP DIFERENTE';
-                            resultDiv.className = 'text-center text-xs font-mono mt-4 h-6 tracking-wider text-red-500 font-bold';
-                        }
-                    }
-                }
-
-                async function runSimulation() {
-                    const key = document.getElementById('testKey').value;
-                    const ip = document.getElementById('testIP').value;
-                    if (!key || !ip) return alert('PREENCHA OS CAMPOS');
-                    await simularLogin(key, ip);
-                }
-
+            if (error) {
+                alert('Erro ao criar: ' + error.message);
+            } else {
+                closeModal('generateModal');
                 fetchLicenses();
-                setInterval(fetchLicenses, 30000);
+                // Clear inputs
+                document.getElementById('newClientName').value = '';
+                document.getElementById('newClientPhone').value = '';
+            }
+        }
 
-            </script>
+        async function deleteKey(id) {
+            if (!confirm('Tem certeza que deseja deletar este cliente?')) return;
+            await supabaseClient.from('licenses').delete().eq('id', id);
+            fetchLicenses();
+        }
+
+        function copyKey(key) {
+            navigator.clipboard.writeText(key).then(() => alert('Key copiada: ' + key));
+        }
+
+        // --- FILTERS ---
+        function filterTable() {
+            const term = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allLicenses.filter(lic =>
+                (lic.client_username && lic.client_username.toLowerCase().includes(term)) ||
+                (lic.whatsapp && lic.whatsapp.includes(term)) ||
+                (lic.license_key && lic.license_key.toLowerCase().includes(term))
+            );
+            renderTable(filtered);
+        }
+
+        function filterStatus(type) {
+            if (type === 'all') {
+                renderTable(allLicenses);
+            } else if (type === 'monthly') {
+                renderTable(allLicenses.filter(l => l.duration_type === 'monthly'));
+            } else if (type === 'permanent') {
+                renderTable(allLicenses.filter(l => l.duration_type === 'permanent'));
+            }
+        }
+    </script>
 </body>
 
 </html>
