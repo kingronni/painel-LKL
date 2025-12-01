@@ -236,407 +236,401 @@
             <div
                 class="absolute -right-4 -top-4 text-8xl text-red-500 opacity-5 rotate-12 group-hover:rotate-0 transition-transform">
                 B</div>
-            <h3 class="text-gray-500 text-xs uppercase tracking-widest mb-1">Banidos</h3>
-            <p id="statBanned" class="text-4xl font-bold text-red-500 drop-shadow-lg">0</p>
-        </div>
-        <div class="glass-panel p-6 rounded-xl tilt-card border-l-2 border-blue-500 relative overflow-hidden group">
-            <div
-                class="absolute -right-4 -top-4 text-8xl text-blue-500 opacity-5 rotate-12 group-hover:rotate-0 transition-transform">
-                E</div>
-            <h3 class="text-gray-500 text-xs uppercase tracking-widest mb-1">Expirados</h3>
-            <p id="statExpired" class="text-4xl font-bold text-blue-500 drop-shadow-lg">0</p>
-        </div>
-    </div>
-
-    <!-- Main Table -->
-    <main class="w-full max-w-7xl glass-panel rounded-xl overflow-hidden tilt-card z-10 mb-20">
-        <div class="p-4 border-b border-gray-800 flex justify-between items-center bg-black/20">
-            <h2 class="text-sm font-bold text-gray-400 uppercase tracking-widest">Banco de Dados // Licenças</h2>
-            <div class="flex gap-2">
-                <span class="w-3 h-3 rounded-full bg-red-500/20 border border-red-500"></span>
-                <span class="w-3 h-3 rounded-full bg-yellow-500/20 border border-yellow-500"></span>
-                <span class="w-3 h-3 rounded-full bg-green-500/20 border border-green-500"></span>
-            </div>
-        </div>
-        <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="text-gray-500 text-xs uppercase tracking-wider border-b border-gray-800">
-                        <th class="p-5 font-normal">Chave (Key)</th>
-                        <th class="p-5 font-normal">Usuário</th>
-                        <th class="p-5 font-normal">Segurança</th>
-                        <th class="p-5 font-normal">Plano</th>
-                        <th class="p-5 font-normal">Expiração</th>
-                        <th class="p-5 font-normal">HWID/IP Lock</th>
-                        <th class="p-5 font-normal">Status</th>
-                        <th class="p-5 font-normal text-right">Ações</th>
-                    </tr>
-                </thead>
-                <tbody id="licenseTableBody" class="text-sm text-gray-300 divide-y divide-gray-800/50">
-                    <tr>
-                        <td colspan="8" class="p-12 text-center text-gray-600 animate-pulse">
-                            Conectando ao mainframe criptografado...
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </main>
-
-    <!-- Modals (Reused Logic, New Style) -->
-    <div id="generateModal"
-        class="fixed inset-0 bg-black/90 backdrop-blur-md hidden flex items-center justify-center z-50 transition-opacity duration-300">
-        <div
-            class="glass-panel p-8 rounded-xl w-96 border border-[#00ff41] shadow-[0_0_50px_rgba(0,255,65,0.2)] transform scale-100 transition-transform">
-            <h2 class="text-2xl font-bold neon-green mb-8 tracking-tighter">GERAR LICENÇA</h2>
-            <div class="space-y-6">
-                <div>
-                    <label class="block text-xs text-[#00ff41] mb-2 uppercase tracking-widest">Ciclo de Duração</label>
-                    <select id="genDuration"
-                        class="w-full bg-black/50 border border-gray-700 text-white p-3 rounded focus:border-[#00ff41] focus:shadow-[0_0_10px_rgba(0,255,65,0.3)] outline-none transition-all">
-                        <option value="daily">Diário (24h)</option>
-                        <option value="weekly">Semanal (7d)</option>
-                        <option value="monthly">Mensal (30d)</option>
-                        <option value="permanent">Vitalício (Lifetime)</option>
-                    </select>
+            <!-- Main Table -->
+            <main class="w-full max-w-7xl glass-panel rounded-xl overflow-hidden tilt-card z-10 mb-20">
+                <div class="p-4 border-b border-gray-800 flex justify-between items-center bg-black/20">
+                    <h2 class="text-sm font-bold text-gray-400 uppercase tracking-widest">Banco de Dados // Licenças
+                    </h2>
+                    <div class="flex gap-2">
+                        <span class="w-3 h-3 rounded-full bg-red-500/20 border border-red-500"></span>
+                        <span class="w-3 h-3 rounded-full bg-yellow-500/20 border border-yellow-500"></span>
+                        <span class="w-3 h-3 rounded-full bg-green-500/20 border border-green-500"></span>
+                    </div>
                 </div>
-                <div class="flex gap-3 pt-4">
-                    <button onclick="generateKey()"
-                        class="flex-1 bg-[#00ff41] text-black font-bold py-3 hover:bg-[#33ff66] transition clip-path-btn">EXECUTAR</button>
-                    <button onclick="closeModal('generateModal')"
-                        class="flex-1 border border-gray-700 text-gray-400 py-3 hover:bg-gray-800 transition">ABORTAR</button>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="text-gray-500 text-xs uppercase tracking-wider border-b border-gray-800">
+                                <th class="p-5 font-normal">Chave (Key)</th>
+                                <th class="p-5 font-normal">Usuário</th>
+                                <th class="p-5 font-normal">Segurança</th>
+                                <th class="p-5 font-normal">Plano</th>
+                                <th class="p-5 font-normal">Expiração</th>
+                                <th class="p-5 font-normal">HWID/IP Lock</th>
+                                <th class="p-5 font-normal">Status</th>
+                                <th class="p-5 font-normal text-right">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="licenseTableBody" class="text-sm text-gray-300 divide-y divide-gray-800/50">
+                            <tr>
+                                <td colspan="8" class="p-12 text-center text-gray-600 animate-pulse">
+                                    Conectando ao mainframe criptografado...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+
+            <!-- Modals (Reused Logic, New Style) -->
+            <div id="generateModal"
+                class="fixed inset-0 bg-black/90 backdrop-blur-md hidden flex items-center justify-center z-50 transition-opacity duration-300">
+                <div
+                    class="glass-panel p-8 rounded-xl w-96 border border-[#00ff41] shadow-[0_0_50px_rgba(0,255,65,0.2)] transform scale-100 transition-transform">
+                    <h2 class="text-2xl font-bold neon-green mb-8 tracking-tighter">GERAR LICENÇA</h2>
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-xs text-[#00ff41] mb-2 uppercase tracking-widest">Ciclo de
+                                Duração</label>
+                            <select id="genDuration"
+                                class="w-full bg-black/50 border border-gray-700 text-white p-3 rounded focus:border-[#00ff41] focus:shadow-[0_0_10px_rgba(0,255,65,0.3)] outline-none transition-all">
+                                <option value="daily">Diário (24h)</option>
+                                <option value="weekly">Semanal (7d)</option>
+                                <option value="monthly">Mensal (30d)</option>
+                                <option value="permanent">Vitalício (Lifetime)</option>
+                            </select>
+                        </div>
+                        <div class="flex gap-3 pt-4">
+                            <button onclick="generateKey()"
+                                class="flex-1 bg-[#00ff41] text-black font-bold py-3 hover:bg-[#33ff66] transition clip-path-btn">EXECUTAR</button>
+                            <button onclick="closeModal('generateModal')"
+                                class="flex-1 border border-gray-700 text-gray-400 py-3 hover:bg-gray-800 transition">ABORTAR</button>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <div id="customModal"
-        class="fixed inset-0 bg-black/90 backdrop-blur-md hidden flex items-center justify-center z-50">
-        <div class="glass-panel p-8 rounded-xl w-96 border border-[#bc13fe] shadow-[0_0_50px_rgba(188,19,254,0.2)]">
-            <h2 class="text-2xl font-bold neon-purple mb-8 tracking-tighter">INJEÇÃO CUSTOMIZADA</h2>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-xs text-[#bc13fe] mb-1 uppercase tracking-widest">Usuário Alvo</label>
-                    <input type="text" id="custUser"
-                        class="w-full bg-black/50 border border-gray-700 text-white p-3 rounded focus:border-[#bc13fe] outline-none">
-                </div>
-                <div>
-                    <label class="block text-xs text-[#bc13fe] mb-1 uppercase tracking-widest">Código de Acesso
-                        (Senha)</label>
-                    <input type="text" id="custPass"
-                        class="w-full bg-black/50 border border-gray-700 text-white p-3 rounded focus:border-[#bc13fe] outline-none">
-                </div>
-                <div>
-                    <label class="block text-xs text-[#bc13fe] mb-1 uppercase tracking-widest">Duração</label>
-                    <select id="custDuration"
-                        class="w-full bg-black/50 border border-gray-700 text-white p-3 rounded focus:border-[#bc13fe] outline-none">
-                        <option value="daily">Diário</option>
-                        <option value="weekly">Semanal</option>
-                        <option value="monthly">Mensal</option>
-                        <option value="permanent">Vitalício</option>
-                    </select>
-                </div>
-                <div class="flex gap-3 pt-4">
-                    <button onclick="createCustomKey()"
-                        class="flex-1 bg-[#bc13fe] text-black font-bold py-3 hover:bg-[#d15aff] transition">INJETAR</button>
-                    <button onclick="closeModal('customModal')"
-                        class="flex-1 border border-gray-700 text-gray-400 py-3 hover:bg-gray-800 transition">ABORTAR</button>
+            <div id="customModal"
+                class="fixed inset-0 bg-black/90 backdrop-blur-md hidden flex items-center justify-center z-50">
+                <div
+                    class="glass-panel p-8 rounded-xl w-96 border border-[#bc13fe] shadow-[0_0_50px_rgba(188,19,254,0.2)]">
+                    <h2 class="text-2xl font-bold neon-purple mb-8 tracking-tighter">INJEÇÃO CUSTOMIZADA</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs text-[#bc13fe] mb-1 uppercase tracking-widest">Usuário
+                                Alvo</label>
+                            <input type="text" id="custUser"
+                                class="w-full bg-black/50 border border-gray-700 text-white p-3 rounded focus:border-[#bc13fe] outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-[#bc13fe] mb-1 uppercase tracking-widest">Código de Acesso
+                                (Senha)</label>
+                            <input type="text" id="custPass"
+                                class="w-full bg-black/50 border border-gray-700 text-white p-3 rounded focus:border-[#bc13fe] outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-[#bc13fe] mb-1 uppercase tracking-widest">Duração</label>
+                            <select id="custDuration"
+                                class="w-full bg-black/50 border border-gray-700 text-white p-3 rounded focus:border-[#bc13fe] outline-none">
+                                <option value="daily">Diário</option>
+                                <option value="weekly">Semanal</option>
+                                <option value="monthly">Mensal</option>
+                                <option value="permanent">Vitalício</option>
+                            </select>
+                        </div>
+                        <div class="flex gap-3 pt-4">
+                            <button onclick="createCustomKey()"
+                                class="flex-1 bg-[#bc13fe] text-black font-bold py-3 hover:bg-[#d15aff] transition">INJETAR</button>
+                            <button onclick="closeModal('customModal')"
+                                class="flex-1 border border-gray-700 text-gray-400 py-3 hover:bg-gray-800 transition">ABORTAR</button>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Test Modal -->
-    <div id="testModal" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden flex items-center justify-center z-50">
-        <div class="glass-panel p-8 rounded-xl w-96 border border-white shadow-[0_0_30px_rgba(255,255,255,0.1)]">
-            <h2 class="text-xl font-bold text-white mb-6 tracking-widest">SIMULAÇÃO // LOGIN</h2>
-            <div class="space-y-4">
-                <input type="text" id="testKey" placeholder="Chave de Licença..."
-                    class="w-full bg-black/50 border border-gray-700 text-white p-3 rounded outline-none focus:border-white">
-                <input type="text" id="testIP" placeholder="IP Virtual (ex: 10.0.0.1)" value="10.0.0.1"
-                    class="w-full bg-black/50 border border-gray-700 text-white p-3 rounded outline-none focus:border-white">
+            <!-- Test Modal -->
+            <div id="testModal"
+                class="fixed inset-0 bg-black/90 backdrop-blur-md hidden flex items-center justify-center z-50">
+                <div
+                    class="glass-panel p-8 rounded-xl w-96 border border-white shadow-[0_0_30px_rgba(255,255,255,0.1)]">
+                    <h2 class="text-xl font-bold text-white mb-6 tracking-widest">SIMULAÇÃO // LOGIN</h2>
+                    <div class="space-y-4">
+                        <input type="text" id="testKey" placeholder="Chave de Licença..."
+                            class="w-full bg-black/50 border border-gray-700 text-white p-3 rounded outline-none focus:border-white">
+                        <input type="text" id="testIP" placeholder="IP Virtual (ex: 10.0.0.1)" value="10.0.0.1"
+                            class="w-full bg-black/50 border border-gray-700 text-white p-3 rounded outline-none focus:border-white">
 
-                <div class="flex gap-3 mt-6">
-                    <button onclick="runSimulation()"
-                        class="flex-1 bg-white text-black font-bold py-3 hover:bg-gray-200 transition">CONECTAR</button>
-                    <button onclick="closeModal('testModal')"
-                        class="flex-1 border border-gray-700 text-gray-400 py-3 hover:bg-gray-800 transition">FECHAR</button>
+                        <div class="flex gap-3 mt-6">
+                            <button onclick="runSimulation()"
+                                class="flex-1 bg-white text-black font-bold py-3 hover:bg-gray-200 transition">CONECTAR</button>
+                            <button onclick="closeModal('testModal')"
+                                class="flex-1 border border-gray-700 text-gray-400 py-3 hover:bg-gray-800 transition">FECHAR</button>
+                        </div>
+                        <div id="simResult" class="text-center text-xs font-mono mt-4 h-6 tracking-wider"></div>
+                    </div>
                 </div>
-                <div id="simResult" class="text-center text-xs font-mono mt-4 h-6 tracking-wider"></div>
             </div>
-        </div>
-    </div>
 
-    <!-- Floating Action -->
-    <button onclick="openModal('testModal')"
-        class="fixed bottom-8 right-8 bg-gray-900 text-white px-6 py-3 rounded-full text-xs font-bold border border-gray-700 hover:border-white hover:bg-black hover:shadow-[0_0_20px_white] transition-all z-40 uppercase tracking-widest">
-        🧪 Sim. Login
-    </button>
+            <!-- Floating Action -->
+            <button onclick="openModal('testModal')"
+                class="fixed bottom-8 right-8 bg-gray-900 text-white px-6 py-3 rounded-full text-xs font-bold border border-gray-700 hover:border-white hover:bg-black hover:shadow-[0_0_20px_white] transition-all z-40 uppercase tracking-widest">
+                🧪 Sim. Login
+            </button>
 
-    <script>
-        // --- 3D TILT EFFECT LOGIC ---
-        document.addEventListener('mousemove', (e) => {
-            const cards = document.querySelectorAll('.tilt-card');
-            cards.forEach(card => {
-                const rect = card.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
+            <script>
+                // --- 3D TILT EFFECT LOGIC ---
+                document.addEventListener('mousemove', (e) => {
+                    const cards = document.querySelectorAll('.tilt-card');
+                    cards.forEach(card => {
+                        const rect = card.getBoundingClientRect();
+                        const x = e.clientX - rect.left;
+                        const y = e.clientY - rect.top;
 
-                // Only animate if mouse is near/over the element to save performance
-                if (x > -50 && x < rect.width + 50 && y > -50 && y < rect.height + 50) {
-                    const centerX = rect.width / 2;
-                    const centerY = rect.height / 2;
-                    const rotateX = ((y - centerY) / centerY) * -2; // Max rotation deg
-                    const rotateY = ((x - centerX) / centerX) * 2;
+                        // Only animate if mouse is near/over the element to save performance
+                        if (x > -50 && x < rect.width + 50 && y > -50 && y < rect.height + 50) {
+                            const centerX = rect.width / 2;
+                            const centerY = rect.height / 2;
+                            const rotateX = ((y - centerY) / centerY) * -2; // Max rotation deg
+                            const rotateY = ((x - centerX) / centerX) * 2;
 
-                    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-                } else {
-                    card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0)';
+                            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+                        } else {
+                            card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0)';
+                        }
+                    });
+                });
+
+                // --- MATRIX RAIN EFFECT ---
+                const canvas = document.getElementById('matrix-canvas');
+                const ctx = canvas.getContext('2d');
+
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+
+                const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン';
+                const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                const nums = '0123456789';
+                const alphabet = katakana + latin + nums;
+
+                const fontSize = 16;
+                const columns = canvas.width / fontSize;
+
+                const rainDrops = [];
+                for (let x = 0; x < columns; x++) {
+                    rainDrops[x] = 1;
                 }
-            });
-        });
 
-        // --- MATRIX RAIN EFFECT ---
-        const canvas = document.getElementById('matrix-canvas');
-        const ctx = canvas.getContext('2d');
+                const draw = () => {
+                    ctx.fillStyle = 'rgba(5, 5, 5, 0.05)';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+                    ctx.fillStyle = '#0F0'; // Green text
+                    ctx.font = fontSize + 'px monospace';
 
-        const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン';
-        const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        const nums = '0123456789';
-        const alphabet = katakana + latin + nums;
+                    for (let i = 0; i < rainDrops.length; i++) {
+                        const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+                        ctx.fillText(text, i * fontSize, rainDrops[i] * fontSize);
 
-        const fontSize = 16;
-        const columns = canvas.width / fontSize;
+                        if (rainDrops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                            rainDrops[i] = 0;
+                        }
+                        rainDrops[i]++;
+                    }
+                };
 
-        const rainDrops = [];
-        for (let x = 0; x < columns; x++) {
-            rainDrops[x] = 1;
-        }
+                setInterval(draw, 30);
 
-        const draw = () => {
-            ctx.fillStyle = 'rgba(5, 5, 5, 0.05)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+                window.addEventListener('resize', () => {
+                    canvas.width = window.innerWidth;
+                    canvas.height = window.innerHeight;
+                });
 
-            ctx.fillStyle = '#0F0'; // Green text
-            ctx.font = fontSize + 'px monospace';
+                // --- SUPABASE LOGIC ---
+                const SUPABASE_URL = 'https://ilwfeyzkaehkfgkxtciq.supabase.co';
+                const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlsd2ZeyzkaehkfgkxtciqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ1NDQxNDcsImV4cCI6MjA4MDEyMDE0N30.eK5-Ut91eYVmSgE9-v-zsHZ5lQB7xzVaJZyfXK8qhiM';
+                // Renamed to avoid conflict with the global 'supabase' object from the CDN
+                const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-            for (let i = 0; i < rainDrops.length; i++) {
-                const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
-                ctx.fillText(text, i * fontSize, rainDrops[i] * fontSize);
+                function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+                function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
-                if (rainDrops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-                    rainDrops[i] = 0;
+                async function fetchLicenses() {
+                    const { data, error } = await supabaseClient
+                        .from('licenses')
+                        .select('*')
+                        .order('created_at', { ascending: false });
+
+                    if (error) {
+                        console.error('Erro Supabase:', error);
+                        if (error.message.includes('JWT') || error.code === 'PGRST301') {
+                            alert('ERRO DE CONEXÃO: Sua API Key parece inválida. Verifique o console.');
+                        }
+                        return;
+                    }
+                    renderTable(data);
+                    updateStats(data);
                 }
-                rainDrops[i]++;
-            }
-        };
 
-        setInterval(draw, 30);
+                function renderTable(licenses) {
+                    const tbody = document.getElementById('licenseTableBody');
+                    tbody.innerHTML = '';
 
-        window.addEventListener('resize', () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        });
+                    if (licenses.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="8" class="p-8 text-center text-gray-600">BANCO DE DADOS VAZIO</td></tr>';
+                        return;
+                    }
 
-        // --- SUPABASE LOGIC ---
-        const SUPABASE_URL = 'https://ilwfeyzkaehkfgkxtciq.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlsd2ZeyzkaehkfgkxtciqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ1NDQxNDcsImV4cCI6MjA4MDEyMDE0N30.eK5-Ut91eYVmSgE9-v-zsHZ5lQB7xzVaJZyfXK8qhiM';
+                    licenses.forEach(lic => {
+                        const tr = document.createElement('tr');
+                        tr.className = 'hover:bg-white/5 transition-colors group border-b border-gray-800/30';
 
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                        const expires = new Date(lic.expires_at).toLocaleDateString('pt-BR');
+                        const isExpired = new Date() > new Date(lic.expires_at);
+                        const statusColor = lic.status === 'active' ? 'text-[#00ff41]' : (lic.status === 'banned' ? 'text-red-500' : 'text-gray-500');
 
-        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
-        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-
-        async function fetchLicenses() {
-            const { data, error } = await supabase
-                .from('licenses')
-                .select('*')
-                .order('created_at', { ascending: false });
-
-            if (error) {
-                console.error('Erro Supabase:', error);
-                if (error.message.includes('JWT') || error.code === 'PGRST301') {
-                    alert('ERRO DE CONEXÃO: Sua API Key parece inválida. Verifique o console.');
+                        tr.innerHTML = `
+                            <td class="p-5 font-mono text-xs text-gray-400 select-all tracking-wider">${lic.license_key}</td>
+                            <td class="p-5 text-white font-bold">${lic.client_username || '<span class="text-gray-700">ANON</span>'}</td>
+                            <td class="p-5 text-gray-600 tracking-widest">••••••</td>
+                            <td class="p-5 capitalize text-gray-400 text-xs border-l border-gray-800/50">${lic.duration_type}</td>
+                            <td class="p-5 ${isExpired ? 'text-red-400' : 'text-gray-300'} font-mono text-xs">${expires}</td>
+                            <td class="p-5 font-mono text-xs ${lic.locked_ip ? 'text-blue-400' : 'text-gray-700'}">${lic.locked_ip || 'DESTRAVADO'}</td>
+                            <td class="p-5 font-bold text-xs uppercase ${statusColor} tracking-wider">${lic.status}</td>
+                            <td class="p-5 text-right">
+                                <button onclick="banKey('${lic.id}')" class="text-red-500 hover:text-red-400 mr-3 text-xs uppercase font-bold tracking-wider hover:underline">[BANIR]</button>
+                                <button onclick="deleteKey('${lic.id}')" class="text-gray-600 hover:text-white text-xs uppercase font-bold tracking-wider hover:underline">[DELETAR]</button>
+                            </td>
+                            `;
+                        tbody.appendChild(tr);
+                    });
                 }
-                return;
-            }
-            renderTable(data);
-            updateStats(data);
-        }
 
-        function renderTable(licenses) {
-            const tbody = document.getElementById('licenseTableBody');
-            tbody.innerHTML = '';
+                function updateStats(data) {
+                    document.getElementById('statTotal').innerText = data.length;
+                    document.getElementById('statActive').innerText = data.filter(d => d.status === 'active').length;
+                    document.getElementById('statBanned').innerText = data.filter(d => d.status === 'banned').length;
+                    document.getElementById('statExpired').innerText = data.filter(d => d.status === 'expired' || new Date() > new Date(d.expires_at)).length;
+                }
 
-            if (licenses.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" class="p-8 text-center text-gray-600">BANCO DE DADOS VAZIO</td></tr>';
-                return;
-            }
+                async function generateKey() {
+                    try {
+                        const duration = document.getElementById('genDuration').value;
+                        const randomStr = Math.random().toString(36).substring(2, 6) + '-' + Math.random().toString(36).substring(2, 6);
+                        const key = `LKL-${randomStr.toUpperCase()}`;
 
-            licenses.forEach(lic => {
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-white/5 transition-colors group border-b border-gray-800/30';
+                        console.log('Tentando gerar key:', key);
+                        await createLicenseInDB(key, null, null, duration);
+                        closeModal('generateModal');
+                    } catch (e) {
+                        alert('Erro inesperado ao gerar: ' + e.message);
+                    }
+                }
 
-                const expires = new Date(lic.expires_at).toLocaleDateString('pt-BR');
-                const isExpired = new Date() > new Date(lic.expires_at);
-                const statusColor = lic.status === 'active' ? 'text-[#00ff41]' : (lic.status === 'banned' ? 'text-red-500' : 'text-gray-500');
+                async function createCustomKey() {
+                    const user = document.getElementById('custUser').value;
+                    const pass = document.getElementById('custPass').value;
+                    const duration = document.getElementById('custDuration').value;
+                    const randomStr = Math.random().toString(36).substring(2, 6);
+                    const key = `LKL-CUST-${randomStr.toUpperCase()}`;
+                    if (!user || !pass) return alert('Campos obrigatórios!');
+                    await createLicenseInDB(key, user, pass, duration);
+                    closeModal('customModal');
+                }
 
-                tr.innerHTML = `
-                    <td class="p-5 font-mono text-xs text-gray-400 select-all tracking-wider">${lic.license_key}</td>
-                    <td class="p-5 text-white font-bold">${lic.client_username || '<span class="text-gray-700">ANON</span>'}</td>
-                    <td class="p-5 text-gray-600 tracking-widest">••••••</td>
-                    <td class="p-5 capitalize text-gray-400 text-xs border-l border-gray-800/50">${lic.duration_type}</td>
-                    <td class="p-5 ${isExpired ? 'text-red-400' : 'text-gray-300'} font-mono text-xs">${expires}</td>
-                    <td class="p-5 font-mono text-xs ${lic.locked_ip ? 'text-blue-400' : 'text-gray-700'}">${lic.locked_ip || 'DESTRAVADO'}</td>
-                    <td class="p-5 font-bold text-xs uppercase ${statusColor} tracking-wider">${lic.status}</td>
-                    <td class="p-5 text-right">
-                        <button onclick="banKey('${lic.id}')" class="text-red-500 hover:text-red-400 mr-3 text-xs uppercase font-bold tracking-wider hover:underline">[BANIR]</button>
-                        <button onclick="deleteKey('${lic.id}')" class="text-gray-600 hover:text-white text-xs uppercase font-bold tracking-wider hover:underline">[DELETAR]</button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
+                async function createLicenseInDB(key, user, pass, durationType) {
+                    const now = new Date();
+                    let expires = new Date();
+                    if (durationType === 'daily') expires.setDate(now.getDate() + 1);
+                    if (durationType === 'weekly') expires.setDate(now.getDate() + 7);
+                    if (durationType === 'monthly') expires.setDate(now.getDate() + 30);
+                    if (durationType === 'permanent') expires.setFullYear(now.getFullYear() + 100);
 
-        function updateStats(data) {
-            document.getElementById('statTotal').innerText = data.length;
-            document.getElementById('statActive').innerText = data.filter(d => d.status === 'active').length;
-            document.getElementById('statBanned').innerText = data.filter(d => d.status === 'banned').length;
-            document.getElementById('statExpired').innerText = data.filter(d => d.status === 'expired' || new Date() > new Date(d.expires_at)).length;
-        }
+                    console.log('Enviando para Supabase...');
+                    const { error } = await supabaseClient.from('licenses').insert({
+                        license_key: key,
+                        client_username: user,
+                        client_password: pass,
+                        status: 'active',
+                        duration_type: durationType,
+                        expires_at: expires.toISOString(),
+                        locked_ip: null
+                    });
 
-        async function generateKey() {
-            try {
-                const duration = document.getElementById('genDuration').value;
-                const randomStr = Math.random().toString(36).substring(2, 6) + '-' + Math.random().toString(36).substring(2, 6);
-                const key = `LKL-${randomStr.toUpperCase()}`;
+                    if (error) {
+                        console.error('Erro no Insert:', error);
+                        alert('Erro ao criar no banco: ' + error.message + '\nVerifique se sua API Key tem permissão de escrita.');
+                    } else {
+                        console.log('Sucesso!');
+                        fetchLicenses();
+                    }
+                }
 
-                console.log('Tentando gerar key:', key);
-                await createLicenseInDB(key, null, null, duration);
-                closeModal('generateModal');
-            } catch (e) {
-                alert('Erro inesperado ao gerar: ' + e.message);
-            }
-        }
-
-        async function createCustomKey() {
-            const user = document.getElementById('custUser').value;
-            const pass = document.getElementById('custPass').value;
-            const duration = document.getElementById('custDuration').value;
-            const randomStr = Math.random().toString(36).substring(2, 6);
-            const key = `LKL-CUST-${randomStr.toUpperCase()}`;
-            if (!user || !pass) return alert('Campos obrigatórios!');
-            await createLicenseInDB(key, user, pass, duration);
-            closeModal('customModal');
-        }
-
-        async function createLicenseInDB(key, user, pass, durationType) {
-            const now = new Date();
-            let expires = new Date();
-            if (durationType === 'daily') expires.setDate(now.getDate() + 1);
-            if (durationType === 'weekly') expires.setDate(now.getDate() + 7);
-            if (durationType === 'monthly') expires.setDate(now.getDate() + 30);
-            if (durationType === 'permanent') expires.setFullYear(now.getFullYear() + 100);
-
-            console.log('Enviando para Supabase...');
-            const { error } = await supabase.from('licenses').insert({
-                license_key: key,
-                client_username: user,
-                client_password: pass,
-                status: 'active',
-                duration_type: durationType,
-                expires_at: expires.toISOString(),
-                locked_ip: null
-            });
-
-            if (error) {
-                console.error('Erro no Insert:', error);
-                alert('Erro ao criar no banco: ' + error.message + '\nVerifique se sua API Key tem permissão de escrita.');
-            } else {
-                console.log('Sucesso!');
-                fetchLicenses();
-            }
-        }
-
-        async function banKey(id) {
-            if (!confirm('Confirmar Banimento?')) return;
-            await supabase.from('licenses').update({ status: 'banned' }).eq('id', id);
-            fetchLicenses();
-        }
-
-        async function deleteKey(id) {
-            if (!confirm('Confirmar Exclusão?')) return;
-            await supabase.from('licenses').delete().eq('id', id);
-            fetchLicenses();
-        }
-
-        async function simularLogin(key, ipDoUsuario) {
-            const resultDiv = document.getElementById('simResult');
-            resultDiv.innerText = 'AUTENTICANDO...';
-            resultDiv.className = 'text-center text-xs font-mono mt-4 h-6 tracking-wider text-yellow-500 animate-pulse';
-
-            const { data, error } = await supabase
-                .from('licenses')
-                .select('*')
-                .eq('license_key', key)
-                .single();
-
-            if (error || !data) {
-                resultDiv.innerText = 'ACESSO NEGADO: KEY INVÁLIDA';
-                resultDiv.className = 'text-center text-xs font-mono mt-4 h-6 tracking-wider text-red-500';
-                return;
-            }
-
-            if (data.status === 'banned') {
-                resultDiv.innerText = 'ACESSO NEGADO: BANIDO';
-                resultDiv.className = 'text-center text-xs font-mono mt-4 h-6 tracking-wider text-red-600 font-bold';
-                return;
-            }
-
-            if (new Date() > new Date(data.expires_at)) {
-                resultDiv.innerText = 'ACESSO NEGADO: EXPIRADO';
-                resultDiv.className = 'text-center text-xs font-mono mt-4 h-6 tracking-wider text-orange-500';
-                return;
-            }
-
-            if (data.locked_ip === null) {
-                const { error: updateError } = await supabase
-                    .from('licenses')
-                    .update({ locked_ip: ipDoUsuario, status: 'active' })
-                    .eq('id', data.id);
-
-                if (updateError) {
-                    resultDiv.innerText = 'ERRO DE BANCO DE DADOS';
-                } else {
-                    resultDiv.innerText = 'ACESSO PERMITIDO [TRAVADO EM ' + ipDoUsuario + ']';
-                    resultDiv.className = 'text-center text-xs font-mono mt-4 h-6 tracking-wider text-[#00ff41]';
+                async function banKey(id) {
+                    if (!confirm('Confirmar Banimento?')) return;
+                    await supabaseClient.from('licenses').update({ status: 'banned' }).eq('id', id);
                     fetchLicenses();
                 }
-            } else {
-                if (data.locked_ip === ipDoUsuario) {
-                    resultDiv.innerText = 'ACESSO PERMITIDO';
-                    resultDiv.className = 'text-center text-xs font-mono mt-4 h-6 tracking-wider text-[#00ff41]';
-                } else {
-                    resultDiv.innerText = 'ALERTA DE SEGURANÇA: IP DIFERENTE';
-                    resultDiv.className = 'text-center text-xs font-mono mt-4 h-6 tracking-wider text-red-500 font-bold';
+
+                async function deleteKey(id) {
+                    if (!confirm('Confirmar Exclusão?')) return;
+                    await supabaseClient.from('licenses').delete().eq('id', id);
+                    fetchLicenses();
                 }
-            }
-        }
 
-        async function runSimulation() {
-            const key = document.getElementById('testKey').value;
-            const ip = document.getElementById('testIP').value;
-            if (!key || !ip) return alert('PREENCHA OS CAMPOS');
-            await simularLogin(key, ip);
-        }
+                async function simularLogin(key, ipDoUsuario) {
+                    const resultDiv = document.getElementById('simResult');
+                    resultDiv.innerText = 'AUTENTICANDO...';
+                    resultDiv.className = 'text-center text-xs font-mono mt-4 h-6 tracking-wider text-yellow-500 animate-pulse';
 
-        fetchLicenses();
-        setInterval(fetchLicenses, 30000);
+                    const { data, error } = await supabaseClient
+                        .from('licenses')
+                        .select('*')
+                        .eq('license_key', key)
+                        .single();
 
-    </script>
+                    if (error || !data) {
+                        resultDiv.innerText = 'ACESSO NEGADO: KEY INVÁLIDA';
+                        resultDiv.className = 'text-center text-xs font-mono mt-4 h-6 tracking-wider text-red-500';
+                        return;
+                    }
+
+                    if (data.status === 'banned') {
+                        resultDiv.innerText = 'ACESSO NEGADO: BANIDO';
+                        resultDiv.className = 'text-center text-xs font-mono mt-4 h-6 tracking-wider text-red-600 font-bold';
+                        return;
+                    }
+
+                    if (new Date() > new Date(data.expires_at)) {
+                        resultDiv.innerText = 'ACESSO NEGADO: EXPIRADO';
+                        resultDiv.className = 'text-center text-xs font-mono mt-4 h-6 tracking-wider text-orange-500';
+                        return;
+                    }
+
+                    if (data.locked_ip === null) {
+                        const { error: updateError } = await supabaseClient
+                            .from('licenses')
+                            .update({ locked_ip: ipDoUsuario, status: 'active' })
+                            .eq('id', data.id);
+
+                        if (updateError) {
+                            resultDiv.innerText = 'ERRO DE BANCO DE DADOS';
+                        } else {
+                            resultDiv.innerText = 'ACESSO PERMITIDO [TRAVADO EM ' + ipDoUsuario + ']';
+                            resultDiv.className = 'text-center text-xs font-mono mt-4 h-6 tracking-wider text-[#00ff41]';
+                            fetchLicenses();
+                        }
+                    } else {
+                        if (data.locked_ip === ipDoUsuario) {
+                            resultDiv.innerText = 'ACESSO PERMITIDO';
+                            resultDiv.className = 'text-center text-xs font-mono mt-4 h-6 tracking-wider text-[#00ff41]';
+                        } else {
+                            resultDiv.innerText = 'ALERTA DE SEGURANÇA: IP DIFERENTE';
+                            resultDiv.className = 'text-center text-xs font-mono mt-4 h-6 tracking-wider text-red-500 font-bold';
+                        }
+                    }
+                }
+
+                async function runSimulation() {
+                    const key = document.getElementById('testKey').value;
+                    const ip = document.getElementById('testIP').value;
+                    if (!key || !ip) return alert('PREENCHA OS CAMPOS');
+                    await simularLogin(key, ip);
+                }
+
+                fetchLicenses();
+                setInterval(fetchLicenses, 30000);
+
+            </script>
 </body>
 
 </html>
