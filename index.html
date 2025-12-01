@@ -33,7 +33,8 @@
         }
 
         /* Matrix Canvas */
-        #matrix-canvas {
+        #matrix-canvas,
+        #matrix-login-canvas {
             position: fixed;
             top: 0;
             left: 0;
@@ -143,144 +144,177 @@
 
 <body class="min-h-screen flex flex-col items-center p-4 md:p-8">
 
-    <canvas id="matrix-canvas"></canvas>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="fixed inset-0 bg-black z-[100] flex flex-col items-center justify-center">
+        <canvas id="matrix-login-canvas" class="absolute inset-0 opacity-20 pointer-events-none"></canvas>
 
-    <!-- Header -->
-    <header class="w-full max-w-7xl mb-12 text-center relative z-10">
-        <h1 class="text-5xl md:text-7xl font-black text-white tracking-tighter mb-2 font-inter glitch-text"
-            style="text-shadow: 2px 2px 0px #00ff41, -2px -2px 0px #bc13fe;">LKL XIT LIOS</h1>
-        <p class="text-green-500 text-sm tracking-[0.5em] font-bold uppercase opacity-80">Advanced Client Control System
-        </p>
-        <div class="h-px w-full bg-gradient-to-r from-transparent via-green-900/80 to-transparent mt-8"></div>
-    </header>
+        <div
+            class="glass-panel p-10 rounded-lg w-96 border border-green-900 shadow-[0_0_50px_rgba(0,255,65,0.1)] relative z-10 flex flex-col items-center">
+            <h1 class="text-4xl font-black text-white tracking-tighter mb-2 font-inter glitch-text"
+                style="text-shadow: 2px 2px 0px #00ff41;">LKL XIT LIOS</h1>
+            <p class="text-green-600 text-xs tracking-[0.3em] font-bold uppercase mb-8">System Access</p>
 
-    <!-- Control Bar -->
-    <div class="w-full max-w-7xl flex flex-col md:flex-row justify-between items-end mb-8 gap-4 z-10">
-        <div class="text-xs text-gray-500 space-y-1 font-mono">
-            <p>SISTEMA: <span class="text-neon-green font-bold animate-pulse">ONLINE</span></p>
-            <p>DATA: <span id="currentDate">--/--/----</span></p>
-        </div>
-        <div class="flex gap-4">
-            <button onclick="openModal('generateModal')"
-                class="btn-neon text-neon-green px-6 py-3 font-bold text-sm flex items-center gap-2 hover-glow">
-                <span>+</span> NOVO CLIENTE
-            </button>
-            <button onclick="openModal('customModal')"
-                class="btn-neon text-neon-purple px-6 py-3 font-bold text-sm flex items-center gap-2 hover-glow">
-                <span>#</span> CUSTOM KEY
-            </button>
+            <div class="w-full space-y-4">
+                <div>
+                    <label class="block text-xs text-green-800 mb-1 uppercase font-bold">Usuário</label>
+                    <input type="text" id="loginUser"
+                        class="w-full bg-black/50 border border-gray-800 text-white p-3 text-sm focus:border-green-500 outline-none transition-colors text-center uppercase">
+                </div>
+                <div>
+                    <label class="block text-xs text-green-800 mb-1 uppercase font-bold">Senha</label>
+                    <input type="password" id="loginPass"
+                        class="w-full bg-black/50 border border-gray-800 text-white p-3 text-sm focus:border-green-500 outline-none transition-colors text-center">
+                </div>
+                <button onclick="attemptLogin()"
+                    class="w-full btn-neon text-neon-green py-3 font-bold text-sm hover-glow mt-4">
+                    ENTRAR
+                </button>
+                <p id="loginError" class="text-red-500 text-xs text-center font-bold hidden mt-2">ACESSO NEGADO</p>
+            </div>
         </div>
     </div>
 
-    <!-- Status Cards -->
-    <div class="w-full max-w-7xl grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 z-10">
-        <!-- Active Card -->
-        <div class="glass-panel p-6 rounded relative overflow-hidden border-l-4 border-neon-green tilt-card group">
-            <div
-                class="absolute -right-6 -top-6 text-9xl text-green-500 opacity-5 rotate-12 group-hover:rotate-0 transition-transform duration-500">
-                A</div>
-            <div class="flex justify-between items-start mb-4">
-                <h3 class="text-gray-400 text-xs uppercase tracking-widest">Ativos</h3>
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24"
+    <!-- Main Content (Hidden by default) -->
+    <div id="mainContent" class="w-full flex flex-col items-center hidden opacity-0 transition-opacity duration-1000">
+
+        <canvas id="matrix-canvas"></canvas>
+
+        <!-- Header -->
+        <header class="w-full max-w-7xl mb-12 text-center relative z-10">
+            <h1 class="text-5xl md:text-7xl font-black text-white tracking-tighter mb-2 font-inter glitch-text"
+                style="text-shadow: 2px 2px 0px #00ff41, -2px -2px 0px #bc13fe;">LKL XIT LIOS</h1>
+            <p class="text-green-500 text-sm tracking-[0.5em] font-bold uppercase opacity-80">Advanced Client Control
+                System</p>
+            <div class="h-px w-full bg-gradient-to-r from-transparent via-green-900/80 to-transparent mt-8"></div>
+        </header>
+
+        <!-- Control Bar -->
+        <div class="w-full max-w-7xl flex flex-col md:flex-row justify-between items-end mb-8 gap-4 z-10">
+            <div class="text-xs text-gray-500 space-y-1 font-mono">
+                <p>SISTEMA: <span class="text-neon-green font-bold animate-pulse">ONLINE</span></p>
+                <p>DATA: <span id="currentDate">--/--/----</span></p>
+            </div>
+            <div class="flex gap-4">
+                <button onclick="openModal('generateModal')"
+                    class="btn-neon text-neon-green px-6 py-3 font-bold text-sm flex items-center gap-2 hover-glow">
+                    <span>+</span> NOVO CLIENTE
+                </button>
+                <button onclick="openModal('customModal')"
+                    class="btn-neon text-neon-purple px-6 py-3 font-bold text-sm flex items-center gap-2 hover-glow">
+                    <span>#</span> CUSTOM KEY
+                </button>
+            </div>
+        </div>
+
+        <!-- Status Cards -->
+        <div class="w-full max-w-7xl grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 z-10">
+            <!-- Active Card -->
+            <div class="glass-panel p-6 rounded relative overflow-hidden border-l-4 border-neon-green tilt-card group">
+                <div
+                    class="absolute -right-6 -top-6 text-9xl text-green-500 opacity-5 rotate-12 group-hover:rotate-0 transition-transform duration-500">
+                    A</div>
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="text-gray-400 text-xs uppercase tracking-widest">Ativos</h3>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-500" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                </div>
+                <p id="statActive" class="text-5xl font-bold text-neon-green mb-4">0</p>
+                <div class="w-full h-1 bg-gray-900 rounded-full overflow-hidden">
+                    <div class="h-full bg-green-500 progress-bar shadow-[0_0_10px_#00ff41]" style="width: 70%"></div>
+                </div>
+            </div>
+
+            <!-- Expired Card -->
+            <div class="glass-panel p-6 rounded relative overflow-hidden border-l-4 border-neon-red tilt-card group">
+                <div
+                    class="absolute -right-6 -top-6 text-9xl text-red-500 opacity-5 rotate-12 group-hover:rotate-0 transition-transform duration-500">
+                    E</div>
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="text-gray-400 text-xs uppercase tracking-widest">Vencidos</h3>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <p id="statExpired" class="text-5xl font-bold text-neon-red mb-4">0</p>
+                <div class="w-full h-1 bg-gray-900 rounded-full overflow-hidden">
+                    <div class="h-full bg-red-500 progress-bar shadow-[0_0_10px_#ff003c]" style="width: 30%"></div>
+                </div>
+            </div>
+
+            <!-- Permanent Card -->
+            <div class="glass-panel p-6 rounded relative overflow-hidden border-l-4 border-neon-blue tilt-card group">
+                <div
+                    class="absolute -right-6 -top-6 text-9xl text-blue-500 opacity-5 rotate-12 group-hover:rotate-0 transition-transform duration-500">
+                    P</div>
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="text-gray-400 text-xs uppercase tracking-widest">Permanentes</h3>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <p id="statPermanent" class="text-5xl font-bold text-neon-blue mb-4">0</p>
+                <div class="w-full h-1 bg-gray-900 rounded-full overflow-hidden">
+                    <div class="h-full bg-blue-500 progress-bar shadow-[0_0_10px_#0088ff]" style="width: 90%"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search & Filter -->
+        <div
+            class="w-full max-w-7xl glass-panel p-4 mb-8 flex flex-col md:flex-row justify-between items-center gap-4 border border-gray-800 z-10 tilt-card">
+            <div class="flex items-center gap-3 w-full md:w-1/3 border-b border-gray-800 pb-2 md:pb-0 md:border-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
+                <input type="text" id="searchInput" placeholder="BUSCAR ALVO..."
+                    class="bg-transparent border-none outline-none text-sm text-gray-300 w-full placeholder-gray-600 uppercase font-mono"
+                    onkeyup="filterTable()">
             </div>
-            <p id="statActive" class="text-5xl font-bold text-neon-green mb-4">0</p>
-            <div class="w-full h-1 bg-gray-900 rounded-full overflow-hidden">
-                <div class="h-full bg-green-500 progress-bar shadow-[0_0_10px_#00ff41]" style="width: 70%"></div>
-            </div>
-        </div>
-
-        <!-- Expired Card -->
-        <div class="glass-panel p-6 rounded relative overflow-hidden border-l-4 border-neon-red tilt-card group">
-            <div
-                class="absolute -right-6 -top-6 text-9xl text-red-500 opacity-5 rotate-12 group-hover:rotate-0 transition-transform duration-500">
-                E</div>
-            <div class="flex justify-between items-start mb-4">
-                <h3 class="text-gray-400 text-xs uppercase tracking-widest">Vencidos</h3>
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-            </div>
-            <p id="statExpired" class="text-5xl font-bold text-neon-red mb-4">0</p>
-            <div class="w-full h-1 bg-gray-900 rounded-full overflow-hidden">
-                <div class="h-full bg-red-500 progress-bar shadow-[0_0_10px_#ff003c]" style="width: 30%"></div>
+            <div class="flex gap-2">
+                <button onclick="filterStatus('all')"
+                    class="px-4 py-1 text-xs border border-green-900 text-green-500 hover:bg-green-900/30 transition uppercase font-bold">Todos</button>
+                <button onclick="filterStatus('monthly')"
+                    class="px-4 py-1 text-xs border border-gray-800 text-gray-500 hover:bg-gray-800 transition uppercase font-bold">Mensal</button>
+                <button onclick="filterStatus('permanent')"
+                    class="px-4 py-1 text-xs border border-gray-800 text-gray-500 hover:bg-gray-800 transition uppercase font-bold">Permanente</button>
             </div>
         </div>
 
-        <!-- Permanent Card -->
-        <div class="glass-panel p-6 rounded relative overflow-hidden border-l-4 border-neon-blue tilt-card group">
-            <div
-                class="absolute -right-6 -top-6 text-9xl text-blue-500 opacity-5 rotate-12 group-hover:rotate-0 transition-transform duration-500">
-                P</div>
-            <div class="flex justify-between items-start mb-4">
-                <h3 class="text-gray-400 text-xs uppercase tracking-widest">Permanentes</h3>
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+        <!-- Data Table -->
+        <div class="w-full max-w-7xl glass-panel border border-gray-800 overflow-hidden z-10 tilt-card">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="text-gray-500 text-xs uppercase tracking-wider border-b border-gray-800 bg-black/40">
+                            <th class="p-4 font-bold">Status</th>
+                            <th class="p-4 font-bold">Nome</th>
+                            <th class="p-4 font-bold">Whatsapp</th>
+                            <th class="p-4 font-bold">Plano</th>
+                            <th class="p-4 font-bold">Vencimento</th>
+                            <th class="p-4 font-bold text-right">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="licenseTableBody" class="text-sm text-gray-400 divide-y divide-gray-800/30 font-mono">
+                        <tr>
+                            <td colspan="6"
+                                class="p-12 text-center text-gray-700 uppercase text-xs tracking-widest animate-pulse">
+                                Carregando dados do servidor...</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
-            <p id="statPermanent" class="text-5xl font-bold text-neon-blue mb-4">0</p>
-            <div class="w-full h-1 bg-gray-900 rounded-full overflow-hidden">
-                <div class="h-full bg-blue-500 progress-bar shadow-[0_0_10px_#0088ff]" style="width: 90%"></div>
-            </div>
         </div>
-    </div>
 
-    <!-- Search & Filter -->
-    <div
-        class="w-full max-w-7xl glass-panel p-4 mb-8 flex flex-col md:flex-row justify-between items-center gap-4 border border-gray-800 z-10 tilt-card">
-        <div class="flex items-center gap-3 w-full md:w-1/3 border-b border-gray-800 pb-2 md:pb-0 md:border-0">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24"
-                stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            <input type="text" id="searchInput" placeholder="BUSCAR ALVO..."
-                class="bg-transparent border-none outline-none text-sm text-gray-300 w-full placeholder-gray-600 uppercase font-mono"
-                onkeyup="filterTable()">
-        </div>
-        <div class="flex gap-2">
-            <button onclick="filterStatus('all')"
-                class="px-4 py-1 text-xs border border-green-900 text-green-500 hover:bg-green-900/30 transition uppercase font-bold">Todos</button>
-            <button onclick="filterStatus('monthly')"
-                class="px-4 py-1 text-xs border border-gray-800 text-gray-500 hover:bg-gray-800 transition uppercase font-bold">Mensal</button>
-            <button onclick="filterStatus('permanent')"
-                class="px-4 py-1 text-xs border border-gray-800 text-gray-500 hover:bg-gray-800 transition uppercase font-bold">Permanente</button>
-        </div>
-    </div>
-
-    <!-- Data Table -->
-    <div class="w-full max-w-7xl glass-panel border border-gray-800 overflow-hidden z-10 tilt-card">
-        <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="text-gray-500 text-xs uppercase tracking-wider border-b border-gray-800 bg-black/40">
-                        <th class="p-4 font-bold">Status</th>
-                        <th class="p-4 font-bold">Nome</th>
-                        <th class="p-4 font-bold">Whatsapp</th>
-                        <th class="p-4 font-bold">Plano</th>
-                        <th class="p-4 font-bold">Vencimento</th>
-                        <th class="p-4 font-bold text-right">Ações</th>
-                    </tr>
-                </thead>
-                <tbody id="licenseTableBody" class="text-sm text-gray-400 divide-y divide-gray-800/30 font-mono">
-                    <!-- Rows will be injected here -->
-                    <tr>
-                        <td colspan="6"
-                            class="p-12 text-center text-gray-700 uppercase text-xs tracking-widest animate-pulse">
-                            Carregando dados do servidor...
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
+    </div> <!-- End Main Content -->
 
     <!-- New Client Modal -->
     <div id="generateModal"
@@ -371,17 +405,58 @@
         // --- INIT ---
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('currentDate').innerText = new Date().toLocaleDateString('pt-BR');
-            fetchLicenses();
-            initMatrix();
-            initTilt();
+            initMatrix('matrix-login-canvas'); // Matrix for login screen
+
+            // Add event listener for Enter key on password field
+            document.getElementById('loginPass').addEventListener('keypress', function (event) {
+                if (event.key === 'Enter') {
+                    attemptLogin();
+                }
+            });
         });
 
         function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
+        // --- AUTHENTICATION ---
+        function attemptLogin() {
+            const user = document.getElementById('loginUser').value.trim();
+            const pass = document.getElementById('loginPass').value.trim();
+            const errorMsg = document.getElementById('loginError');
+
+            // Hardcoded Credentials
+            const creds = [
+                { u: 'King', p: 'Rtydfgxc5202@' },
+                { u: 'Lee', p: 'Lee53k' }
+            ];
+
+            const isValid = creds.some(c => c.u.toLowerCase() === user.toLowerCase() && c.p === pass);
+
+            if (isValid) {
+                document.getElementById('loginScreen').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('loginScreen').classList.add('hidden');
+                    const main = document.getElementById('mainContent');
+                    main.classList.remove('hidden');
+                    // Trigger reflow
+                    void main.offsetWidth;
+                    main.style.opacity = '1';
+
+                    // Initialize main content features after login
+                    fetchLicenses();
+                    initMatrix('matrix-canvas');
+                    initTilt();
+                }, 500);
+            } else {
+                errorMsg.classList.remove('hidden');
+                document.getElementById('loginPass').value = '';
+            }
+        }
+
         // --- MATRIX RAIN ---
-        function initMatrix() {
-            const canvas = document.getElementById('matrix-canvas');
+        function initMatrix(canvasId) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
             const ctx = canvas.getContext('2d');
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
