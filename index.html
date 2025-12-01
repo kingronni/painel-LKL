@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LKL - Licensing Kernel Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700&display=swap');
+
+        :root {
+            --neon-green: #00ff41;
+            --neon-purple: #bc13fe;
+            --bg-dark: #050505;
+        }
+
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background-color: var(--bg-dark);
+            color: #e5e5e5;
+            overflow-x: hidden;
+            perspective: 1000px;
+        }
+
+        /* --- BACKGROUND FX --- */
+        #matrix-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.15;
+        }
+
+        /* --- GLASSMORPHISM & 3D --- */
+        .glass-panel {
+            background: rgba(10, 10, 10, 0.7);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.7);
+            transition: transform 0.1s ease, box-shadow 0.3s ease;
+            transform-style: preserve-3d;
+        }
+
+        .tilt-card:hover {
+            border-color: rgba(0, 255, 65, 0.3);
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.1);
+        }
+
+        /* --- GLITCH EFFECT --- */
+        .glitch-text {
+            position: relative;
+        }
+
+        .glitch-text::before,
+        .glitch-text::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-dark);
+        }
+
+        .glitch-text::before {
+            left: 2px;
+            text-shadow: -1px 0 #ff00c1;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim 5s infinite linear alternate-reverse;
+        }
+
+        .glitch-text::after {
+            left: -2px;
+            text-shadow: -1px 0 #00fff9;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim2 5s infinite linear alternate-reverse;
+        }
+
+        @keyframes glitch-anim {
+            0% {
+                clip: rect(38px, 9999px, 84px, 0);
+            }
+
+            20% {
+                clip: rect(10px, 9999px, 96px, 0);
+            }
+
+            40% {
+                clip: rect(55px, 9999px, 16px, 0);
+            }
+
+            60% {
+                clip: rect(86px, 9999px, 3px, 0);
+            }
+
+            80% {
+                clip: rect(12px, 9999px, 69px, 0);
+            }
+
+            100% {
+                clip: rect(48px, 9999px, 92px, 0);
+            }
+        }
+
+        @keyframes glitch-anim2 {
+            0% {
+                clip: rect(65px, 9999px, 100px, 0);
+            }
+
+            20% {
+                clip: rect(2px, 9999px, 15px, 0);
+            }
+
+            40% {
+                clip: rect(89px, 9999px, 36px, 0);
+            }
+
+            60% {
+                clip: rect(23px, 9999px, 72px, 0);
+            }
+
+            80% {
+                clip: rect(46px, 9999px, 5px, 0);
+            }
+
+            100% {
+                clip: rect(10px, 9999px, 83px, 0);
+            }
+        }
+
+        /* --- NEON UTILS --- */
+        .neon-green {
+            color: var(--neon-green);
+            text-shadow: 0 0 10px rgba(0, 255, 65, 0.6);
+        }
+
+        .neon-purple {
+            color: var(--neon-purple);
+            text-shadow: 0 0 10px rgba(188, 19, 254, 0.6);
+        }
+
+        .btn-cyber {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
+            clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%);
+        }
+
+        .btn-cyber:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 15px var(--neon-green);
+        }
+
+        .btn-cyber-purple:hover {
+            box-shadow: 0 0 15px var(--neon-purple);
+        }
+
+        /* --- TABLE STYLING --- */
+        tr {
+            transition: all 0.2s;
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, 0.03);
+            transform: scale(1.005);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #000;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--neon-green);
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex flex-col items-center relative selection:bg-[#00ff41] selection:text-black">
+
+    <canvas id="matrix-canvas"></canvas>
+
+    <!-- Header -->
+    <header
+        class="w-full max-w-7xl mt-10 mb-8 flex justify-between items-center glass-panel p-8 rounded-xl tilt-card z-10">
+        <div>
+            <h1 class="text-5xl font-bold text-white tracking-tighter glitch-text" data-text="LKL // KERNEL">LKL <span
+                    class="text-lg text-gray-400 font-normal opacity-70">// KERNEL</span></h1>
+            <div class="flex items-center gap-2 mt-2">
+                <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <p class="text-xs text-green-500 tracking-[0.2em] uppercase">System Online • Secure Connection</p>
+            </div>
+        </div>
+        <div class="flex gap-4">
+            <button onclick="openModal('generateModal')"
+                class="btn-cyber px-8 py-3 bg-black border border-[#00ff41] text-[#00ff41] font-bold text-sm uppercase tracking-widest hover:bg-[#00ff41] hover:text-black">
+                [+] GENERATE KEY
+            </button>
+            <button onclick="openModal('customModal')"
+                class="btn-cyber btn-cyber-purple px-8 py-3 bg-black border border-[#bc13fe] text-[#bc13fe] font-bold text-sm uppercase tracking-widest hover:bg-[#bc13fe] hover:text-black">
+                [#] CUSTOM BUILD
+            </button>
+        </div>
+    </header>
+
+    <!-- Stats Row -->
+    <div class="w-full max-w-7xl grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 z-10">
+        <div class="glass-panel p-6 rounded-xl tilt-card border-l-2 border-[#00ff41] relative overflow-hidden group">
+            <div
+                class="absolute -right-4 -top-4 text-8xl text-[#00ff41] opacity-5 rotate-12 group-hover:rotate-0 transition-transform">
+                K</div>
+            <h3 class="text-gray-500 text-xs uppercase tracking-widest mb-1">Total Licenses</h3>
+            <p id="statTotal" class="text-4xl font-bold neon-green">0</p>
+        </div>
+        <div class="glass-panel p-6 rounded-xl tilt-card border-l-2 border-[#bc13fe] relative overflow-hidden group">
+            <div
+                class="absolute -right-4 -top-4 text-8xl text-[#bc13fe] opacity-5 rotate-12 group-hover:rotate-0 transition-transform">
+                A</div>
+            <h3 class="text-gray-500 text-xs uppercase tracking-widest mb-1">Active Users</h3>
+            <p id="statActive" class="text-4xl font-bold neon-purple">0</p>
+        </div>
+        <div class="glass-panel p-6 rounded-xl tilt-card border-l-2 border-red-500 relative overflow-hidden group">
+            <div
+                class="absolute -right-4 -top-4 text-8xl text-red-500 opacity-5 rotate-12 group-hover:rotate-0 transition-transform">
+                B</div>
+            <h3 class="text-gray-500 text-xs uppercase tracking-widest mb-1">Banned</h3>
+            <p id="statBanned" class="text-4xl font-bold text-red-500 drop-shadow-lg">0</p>
+        </div>
+        <div class="glass-panel p-6 rounded-xl tilt-card border-l-2 border-blue-500 relative overflow-hidden group">
+            <div
+                class="absolute -right-4 -top-4 text-8xl text-blue-500 opacity-5 rotate-12 group-hover:rotate-0 transition-transform">
+                E</div>
+            <h3 class="text-gray-500 text-xs uppercase tracking-widest mb-1">Expired</h3>
+            <p id="statExpired" class="text-4xl font-bold text-blue-500 drop-shadow-lg">0</p>
+        </div>
+    </div>
+
+    <!-- Main Table -->
+    <main class="w-full max-w-7xl glass-panel rounded-xl overflow-hidden tilt-card z-10 mb-20">
+        <div class="p-4 border-b border-gray-800 flex justify-between items-center bg-black/20">
+            <h2 class="text-sm font-bold text-gray-400 uppercase tracking-widest">Database // Licenses</h2>
+            <div class="flex gap-2">
+                <span class="w-3 h-3 rounded-full bg-red-500/20 border border-red-500"></span>
+                <span class="w-3 h-3 rounded-full bg-yellow-500/20 border border-yellow-500"></span>
+                <span class="w-3 h-3 rounded-full bg-green-500/20 border border-green-500"></span>
+            </div>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="text-gray-500 text-xs uppercase tracking-wider border-b border-gray-800">
+                        <th class="p-5 font-normal">Key String</th>
+                        <th class="p-5 font-normal">User</th>
+                        <th class="p-5 font-normal">Security</th>
+                        <th class="p-5 font-normal">Plan</th>
+                        <th class="p-5 font-normal">Expiration</th>
+                        <th class="p-5 font-normal">HWID/IP Lock</th>
+                        <th class="p-5 font-normal">Status</th>
+                        <th class="p-5 font-normal text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="licenseTableBody" class="text-sm text-gray-300 divide-y divide-gray-800/50">
+                    <tr>
+                        <td colspan="8" class="p-12 text-center text-gray-600 animate-pulse">
+                            Connecting to encrypted mainframe...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Modals (Reused Logic, New Style) -->
+    <div id="generateModal"
+        class="fixed inset-0 bg-black/90 backdrop-blur-md hidden flex items-center justify-center z-50 transition-opacity duration-300">
+        <div
+            class="glass-panel p-8 rounded-xl w-96 border border-[#00ff41] shadow-[0_0_50px_rgba(0,255,65,0.2)] transform scale-100 transition-transform">
+            <h2 class="text-2xl font-bold neon-green mb-8 tracking-tighter">GENERATE LICENSE</h2>
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-xs text-[#00ff41] mb-2 uppercase tracking-widest">Duration Cycle</label>
+                    <select id="genDuration"
+                        class="w-full bg-black/50 border border-gray-700 text-white p-3 rounded focus:border-[#00ff41] focus:shadow-[0_0_10px_rgba(0,255,65,0.3)] outline-none transition-all">
+                        <option value="daily">Daily (24h)</option>
+                        <option value="weekly">Weekly (7d)</option>
+                        <option value="monthly">Monthly (30d)</option>
+                        <option value="permanent">Lifetime Access</option>
+                    </select>
+                </div>
+                <div class="flex gap-3 pt-4">
+                    <button onclick="generateKey()"
+                        class="flex-1 bg-[#00ff41] text-black font-bold py-3 hover:bg-[#33ff66] transition clip-path-btn">EXECUTE</button>
+                    <button onclick="closeModal('generateModal')"
+                        class="flex-1 border border-gray-700 text-gray-400 py-3 hover:bg-gray-800 transition">ABORT</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="customModal"
+        class="fixed inset-0 bg-black/90 backdrop-blur-md hidden flex items-center justify-center z-50">
+        <div class="glass-panel p-8 rounded-xl w-96 border border-[#bc13fe] shadow-[0_0_50px_rgba(188,19,254,0.2)]">
+            <h2 class="text-2xl font-bold neon-purple mb-8 tracking-tighter">CUSTOM INJECTION</h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs text-[#bc13fe] mb-1 uppercase tracking-widest">Target User</label>
+                    <input type="text" id="custUser"
+                        class="w-full bg-black/50 border border-gray-700 text-white p-3 rounded focus:border-[#bc13fe] outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs text-[#bc13fe] mb-1 uppercase tracking-widest">Access Code</label>
+                    <input type="text" id="custPass"
+                        class="w-full bg-black/50 border border-gray-700 text-white p-3 rounded focus:border-[#bc13fe] outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs text-[#bc13fe] mb-1 uppercase tracking-widest">Duration</label>
+                    <select id="custDuration"
+                        class="w-full bg-black/50 border border-gray-700 text-white p-3 rounded focus:border-[#bc13fe] outline-none">
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="permanent">Lifetime</option>
+                    </select>
+                </div>
+                <div class="flex gap-3 pt-4">
+                    <button onclick="createCustomKey()"
+                        class="flex-1 bg-[#bc13fe] text-black font-bold py-3 hover:bg-[#d15aff] transition">INJECT</button>
+                    <button onclick="closeModal('customModal')"
+                        class="flex-1 border border-gray-700 text-gray-400 py-3 hover:bg-gray-800 transition">ABORT</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test Modal -->
+    <div id="testModal" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden flex items-center justify-center z-50">
+        <div class="glass-panel p-8 rounded-xl w-96 border border-white shadow-[0_0_30px_rgba(255,255,255,0.1)]">
+            <h2 class="text-xl font-bold text-white mb-6 tracking-widest">SIMULATION // LOGIN</h2>
+            <div class="space-y-4">
+                <input type="text" id="testKey" placeholder="License Key..."
+                    class="w-full bg-black/50 border border-gray-700 text-white p-3 rounded outline-none focus:border-white">
+                <input type="text" id="testIP" placeholder="Virtual IP (e.g. 10.0.0.1)" value="10.0.0.1"
+                    class="w-full bg-black/50 border border-gray-700 text-white p-3 rounded outline-none focus:border-white">
+
+                <div class="flex gap-3 mt-6">
+                    <button onclick="runSimulation()"
+                        class="flex-1 bg-white text-black font-bold py-3 hover:bg-gray-200 transition">CONNECT</button>
+                    <button onclick="closeModal('testModal')"
+                        class="flex-1 border border-gray-700 text-gray-400 py-3 hover:bg-gray-800 transition">CLOSE</button>
+                </div>
+                <div id="simResult" class="text-center text-xs font-mono mt-4 h-6 tracking-wider"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Action -->
+    <button onclick="openModal('testModal')"
+        class="fixed bottom-8 right-8 bg-gray-900 text-white px-6 py-3 rounded-full text-xs font-bold border border-gray-700 hover:border-white hover:bg-black hover:shadow-[0_0_20px_white] transition-all z-40 uppercase tracking-widest">
+        🧪 Sim. Login
+    </button>
+
+    <script>
+        // --- 3D TILT EFFECT LOGIC ---
+        document.addEventListener('mousemove', (e) => {
+            const cards = document.querySelectorAll('.tilt-card');
+            cards.forEach(card => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                // Only animate if mouse is near/over the element to save performance
+                if (x > -50 && x < rect.width + 50 && y > -50 && y < rect.height + 50) {
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    const rotateX = ((y - centerY) / centerY) * -2; // Max rotation deg
+                    const rotateY = ((x - centerX) / centerX) * 2;
+
+                    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+                } else {
+                    card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0)';
+                }
+            });
+        });
+
+        // --- MATRIX RAIN EFFECT ---
+        const canvas = document.getElementById('matrix-canvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン';
+        const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const nums = '0123456789';
+        const alphabet = katakana + latin + nums;
+
+        const fontSize = 16;
+        const columns = canvas.width / fontSize;
+
+        const rainDrops = [];
+        for (let x = 0; x < columns; x++) {
+            rainDrops[x] = 1;
+        }
+
+        const draw = () => {
+            ctx.fillStyle = 'rgba(5, 5, 5, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = '#0F0'; // Green text
+            ctx.font = fontSize + 'px monospace';
+
+            for (let i = 0; i < rainDrops.length; i++) {
+                const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+                ctx.fillText(text, i * fontSize, rainDrops[i] * fontSize);
+
+                if (rainDrops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    rainDrops[i] = 0;
+                }
+                rainDrops[i]++;
+            }
+        };
+
+        setInterval(draw, 30);
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        // --- SUPABASE LOGIC (PRESERVED) ---
+        const SUPABASE_URL = 'https://ilwfeyzkaehkfgkxtciq.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_pfHRVZnYJ36sM9hLEw26gw_qdyn4731';
+
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        async function fetchLicenses() {
+            const { data, error } = await supabase
+                .from('licenses')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) { console.error(error); return; }
+            renderTable(data);
+            updateStats(data);
+        }
+
+        function renderTable(licenses) {
+            const tbody = document.getElementById('licenseTableBody');
+            tbody.innerHTML = '';
+
+            if (licenses.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="p-8 text-center text-gray-600">DATABASE EMPTY</td></tr>';
+                return;
+            }
+
+            licenses.forEach(lic => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-white/5 transition-colors group border-b border-gray-800/30';
+
+                const expires = new Date(lic.expires_at).toLocaleDateString('pt-BR');
+                const isExpired = new Date() > new Date(lic.expires_at);
+                const statusColor = lic.status === 'active' ? 'text-[#00ff41]' : (lic.status === 'banned' ? 'text-red-500' : 'text-gray-500');
+
+                tr.innerHTML = `
+                    <td class="p-5 font-mono text-xs text-gray-400 select-all tracking-wider">${lic.license_key}</td>
+                    <td class="p-5 text-white font-bold">${lic.client_username || '<span class="text-gray-700">ANON</span>'}</td>
+                    <td class="p-5 text-gray-600 tracking-widest">••••••</td>
+                    <td class="p-5 capitalize text-gray-400 text-xs border-l border-gray-800/50">${lic.duration_type}</td>
+                    <td class="p-5 ${isExpired ? 'text-red-400' : 'text-gray-300'} font-mono text-xs">${expires}</td>
+                    <td class="p-5 font-mono text-xs ${lic.locked_ip ? 'text-blue-400' : 'text-gray-700'}">${lic.locked_ip || 'UNLOCKED'}</td>
+                    <td class="p-5 font-bold text-xs uppercase ${statusColor} tracking-wider">${lic.status}</td>
+                    <td class="p-5 text-right">
+                        <button onclick="banKey('${lic.id}')" class="text-red-500 hover:text-red-400 mr-3 text-xs uppercase font-bold tracking-wider hover:underline">[BAN]</button>
+                        <button onclick="deleteKey('${lic.id}')" class="text-gray-600 hover:text-white text-xs uppercase font-bold tracking-wider hover:underline">[DEL]</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function updateStats(data) {
+            document.getElementById('statTotal').innerText = data.length;
+            document.getElementById('statActive').innerText = data.filter(d => d.status === 'active').length;
+            document.getElementById('statBanned').innerText = data.filter(d => d.status === 'banned').length;
+            document.getElementById('statExpired').innerText = data.filter(d => d.status === 'expired' || new Date() > new Date(d.expires_at)).length;
+        }
+
+        async function generateKey() {
+            const duration = document.getElementById('genDuration').value;
+            const randomStr = Math.random().toString(36).substring(2, 6) + '-' + Math.random().toString(36).substring(2, 6);
+            const key = `LKL-${randomStr.toUpperCase()}`;
+            await createLicenseInDB(key, null, null, duration);
+            closeModal('generateModal');
+        }
+
+        async function createCustomKey() {
+            const user = document.getElementById('custUser').value;
+            const pass = document.getElementById('custPass').value;
+            const duration = document.getElementById('custDuration').value;
+            const randomStr = Math.random().toString(36).substring(2, 6);
+            const key = `LKL-CUST-${randomStr.toUpperCase()}`;
+            if (!user || !pass) return alert('Input Required');
+            await createLicenseInDB(key, user, pass, duration);
+            closeModal('customModal');
+        }
+
+        async function createLicenseInDB(key, user, pass, durationType) {
+            const now = new Date();
+            let expires = new Date();
+            if (durationType === 'daily') expires.setDate(now.getDate() + 1);
+            if (durationType === 'weekly') expires.setDate(now.getDate() + 7);
+            if (durationType === 'monthly') expires.setDate(now.getDate() + 30);
+            if (durationType === 'permanent') expires.setFullYear(now.getFullYear() + 100);
+
+            const { error } = await supabase.from('licenses').insert({
+                license_key: key,
+                client_username: user,
+                client_password: pass,
+                status: 'active',
+                duration_type: durationType,
+                expires_at: expires.toISOString(),
+                locked_ip: null
+            });
+
+            if (error) alert('Error: ' + error.message);
+            else fetchLicenses();
+        }
+
+        async function banKey(id) {
+            if (!confirm('Confirm Ban?')) return;
+            await supabase.from('licenses').update({ status: 'banned' }).eq('id', id);
+            fetchLicenses();
+        }
+
+        async function deleteKey(id) {
+            if (!confirm('Confirm Deletion?')) return;
+            await supabase.from('licenses').delete().eq('id', id);
+            fetchLicenses();
+        }
+
+        async function simularLogin(key, ipDoUsuario) {
+            const resultDiv = document.getElementById('simResult');
+            resultDiv.innerText = 'AUTHENTICATING...';
+            resultDiv.className = 'text-center text-xs font-mono mt-4 h-6 tracking-wider text-yellow-500 animate-pulse';
+
+            const { data, error } = await supabase
+                .from('licenses')
+                .select('*')
+                .eq('license_key', key)
+                .single();
+
+            if (error || !data) {
+                resultDiv.innerText = 'ACCESS DENIED: INVALID KEY';
+                resultDiv.className = 'text-center text-xs font-mono mt-4 h-6 tracking-wider text-red-500';
+                return;
+            }
+
+            if (data.status === 'banned') {
+                resultDiv.innerText = 'ACCESS DENIED: BANNED';
+                resultDiv.className = 'text-center text-xs font-mono mt-4 h-6 tracking-wider text-red-600 font-bold';
+                return;
+            }
+
+            if (new Date() > new Date(data.expires_at)) {
+                resultDiv.innerText = 'ACCESS DENIED: EXPIRED';
+                resultDiv.className = 'text-center text-xs font-mono mt-4 h-6 tracking-wider text-orange-500';
+                return;
+            }
+
+            if (data.locked_ip === null) {
+                const { error: updateError } = await supabase
+                    .from('licenses')
+                    .update({ locked_ip: ipDoUsuario, status: 'active' })
+                    .eq('id', data.id);
+
+                if (updateError) {
+                    resultDiv.innerText = 'DATABASE ERROR';
+                } else {
+                    resultDiv.innerText = 'ACCESS GRANTED [LOCKED TO ' + ipDoUsuario + ']';
+                    resultDiv.className = 'text-center text-xs font-mono mt-4 h-6 tracking-wider text-[#00ff41]';
+                    fetchLicenses();
+                }
+            } else {
+                if (data.locked_ip === ipDoUsuario) {
+                    resultDiv.innerText = 'ACCESS GRANTED';
+                    resultDiv.className = 'text-center text-xs font-mono mt-4 h-6 tracking-wider text-[#00ff41]';
+                } else {
+                    resultDiv.innerText = 'SECURITY ALERT: IP MISMATCH';
+                    resultDiv.className = 'text-center text-xs font-mono mt-4 h-6 tracking-wider text-red-500 font-bold';
+                }
+            }
+        }
+
+        async function runSimulation() {
+            const key = document.getElementById('testKey').value;
+            const ip = document.getElementById('testIP').value;
+            if (!key || !ip) return alert('INPUT REQUIRED');
+            await simularLogin(key, ip);
+        }
+
+        fetchLicenses();
+        setInterval(fetchLicenses, 30000);
+
+    </script>
+</body>
+
+</html>
