@@ -437,47 +437,35 @@
 
         window.addEventListener('resize', () => {
             canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        });
+            async function fetchLicenses() {
+                const { data, error } = await supabase
+                    .from('licenses')
+                    .select('*')
+                    .order('created_at', { ascending: false });
 
-        // --- SUPABASE LOGIC (PRESERVED) ---
-        const SUPABASE_URL = 'https://ilwfeyzkaehkfgkxtciq.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_pfHRVZnYJ36sM9hLEw26gw_qdyn4731';
-
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
-        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-
-        async function fetchLicenses() {
-            const { data, error } = await supabase
-                .from('licenses')
-                .select('*')
-                .order('created_at', { ascending: false });
-
-            if (error) { console.error(error); return; }
-            renderTable(data);
-            updateStats(data);
-        }
-
-        function renderTable(licenses) {
-            const tbody = document.getElementById('licenseTableBody');
-            tbody.innerHTML = '';
-
-            if (licenses.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" class="p-8 text-center text-gray-600">DATABASE EMPTY</td></tr>';
-                return;
+                if (error) { console.error(error); return; }
+                renderTable(data);
+                updateStats(data);
             }
 
-            licenses.forEach(lic => {
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-white/5 transition-colors group border-b border-gray-800/30';
+            function renderTable(licenses) {
+                const tbody = document.getElementById('licenseTableBody');
+                tbody.innerHTML = '';
 
-                const expires = new Date(lic.expires_at).toLocaleDateString('pt-BR');
-                const isExpired = new Date() > new Date(lic.expires_at);
-                const statusColor = lic.status === 'active' ? 'text-[#00ff41]' : (lic.status === 'banned' ? 'text-red-500' : 'text-gray-500');
+                if (licenses.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" class="p-8 text-center text-gray-600">DATABASE EMPTY</td></tr>';
+                    return;
+                }
 
-                tr.innerHTML = `
+                licenses.forEach(lic => {
+                    const tr = document.createElement('tr');
+                    tr.className = 'hover:bg-white/5 transition-colors group border-b border-gray-800/30';
+
+                    const expires = new Date(lic.expires_at).toLocaleDateString('pt-BR');
+                    const isExpired = new Date() > new Date(lic.expires_at);
+                    const statusColor = lic.status === 'active' ? 'text-[#00ff41]' : (lic.status === 'banned' ? 'text-red-500' : 'text-gray-500');
+
+                    tr.innerHTML = `
                     <td class="p-5 font-mono text-xs text-gray-400 select-all tracking-wider">${lic.license_key}</td>
                     <td class="p-5 text-white font-bold">${lic.client_username || '<span class="text-gray-700">ANON</span>'}</td>
                     <td class="p-5 text-gray-600 tracking-widest">••••••</td>
@@ -490,132 +478,132 @@
                         <button onclick="deleteKey('${lic.id}')" class="text-gray-600 hover:text-white text-xs uppercase font-bold tracking-wider hover:underline">[DEL]</button>
                     </td>
                 `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        function updateStats(data) {
-            document.getElementById('statTotal').innerText = data.length;
-            document.getElementById('statActive').innerText = data.filter(d => d.status === 'active').length;
-            document.getElementById('statBanned').innerText = data.filter(d => d.status === 'banned').length;
-            document.getElementById('statExpired').innerText = data.filter(d => d.status === 'expired' || new Date() > new Date(d.expires_at)).length;
-        }
-
-        async function generateKey() {
-            const duration = document.getElementById('genDuration').value;
-            const randomStr = Math.random().toString(36).substring(2, 6) + '-' + Math.random().toString(36).substring(2, 6);
-            const key = `LKL-${randomStr.toUpperCase()}`;
-            await createLicenseInDB(key, null, null, duration);
-            closeModal('generateModal');
-        }
-
-        async function createCustomKey() {
-            const user = document.getElementById('custUser').value;
-            const pass = document.getElementById('custPass').value;
-            const duration = document.getElementById('custDuration').value;
-            const randomStr = Math.random().toString(36).substring(2, 6);
-            const key = `LKL-CUST-${randomStr.toUpperCase()}`;
-            if (!user || !pass) return alert('Input Required');
-            await createLicenseInDB(key, user, pass, duration);
-            closeModal('customModal');
-        }
-
-        async function createLicenseInDB(key, user, pass, durationType) {
-            const now = new Date();
-            let expires = new Date();
-            if (durationType === 'daily') expires.setDate(now.getDate() + 1);
-            if (durationType === 'weekly') expires.setDate(now.getDate() + 7);
-            if (durationType === 'monthly') expires.setDate(now.getDate() + 30);
-            if (durationType === 'permanent') expires.setFullYear(now.getFullYear() + 100);
-
-            const { error } = await supabase.from('licenses').insert({
-                license_key: key,
-                client_username: user,
-                client_password: pass,
-                status: 'active',
-                duration_type: durationType,
-                expires_at: expires.toISOString(),
-                locked_ip: null
-            });
-
-            if (error) alert('Error: ' + error.message);
-            else fetchLicenses();
-        }
-
-        async function banKey(id) {
-            if (!confirm('Confirm Ban?')) return;
-            await supabase.from('licenses').update({ status: 'banned' }).eq('id', id);
-            fetchLicenses();
-        }
-
-        async function deleteKey(id) {
-            if (!confirm('Confirm Deletion?')) return;
-            await supabase.from('licenses').delete().eq('id', id);
-            fetchLicenses();
-        }
-
-        async function simularLogin(key, ipDoUsuario) {
-            const resultDiv = document.getElementById('simResult');
-            resultDiv.innerText = 'AUTHENTICATING...';
-            resultDiv.className = 'text-center text-xs font-mono mt-4 h-6 tracking-wider text-yellow-500 animate-pulse';
-
-            const { data, error } = await supabase
-                .from('licenses')
-                .select('*')
-                .eq('license_key', key)
-                .single();
-
-            if (error || !data) {
-                resultDiv.innerText = 'ACCESS DENIED: INVALID KEY';
-                resultDiv.className = 'text-center text-xs font-mono mt-4 h-6 tracking-wider text-red-500';
-                return;
+                    tbody.appendChild(tr);
+                });
             }
 
-            if (data.status === 'banned') {
-                resultDiv.innerText = 'ACCESS DENIED: BANNED';
-                resultDiv.className = 'text-center text-xs font-mono mt-4 h-6 tracking-wider text-red-600 font-bold';
-                return;
+            function updateStats(data) {
+                document.getElementById('statTotal').innerText = data.length;
+                document.getElementById('statActive').innerText = data.filter(d => d.status === 'active').length;
+                document.getElementById('statBanned').innerText = data.filter(d => d.status === 'banned').length;
+                document.getElementById('statExpired').innerText = data.filter(d => d.status === 'expired' || new Date() > new Date(d.expires_at)).length;
             }
 
-            if (new Date() > new Date(data.expires_at)) {
-                resultDiv.innerText = 'ACCESS DENIED: EXPIRED';
-                resultDiv.className = 'text-center text-xs font-mono mt-4 h-6 tracking-wider text-orange-500';
-                return;
+            async function generateKey() {
+                const duration = document.getElementById('genDuration').value;
+                const randomStr = Math.random().toString(36).substring(2, 6) + '-' + Math.random().toString(36).substring(2, 6);
+                const key = `LKL-${randomStr.toUpperCase()}`;
+                await createLicenseInDB(key, null, null, duration);
+                closeModal('generateModal');
             }
 
-            if (data.locked_ip === null) {
-                const { error: updateError } = await supabase
+            async function createCustomKey() {
+                const user = document.getElementById('custUser').value;
+                const pass = document.getElementById('custPass').value;
+                const duration = document.getElementById('custDuration').value;
+                const randomStr = Math.random().toString(36).substring(2, 6);
+                const key = `LKL-CUST-${randomStr.toUpperCase()}`;
+                if (!user || !pass) return alert('Input Required');
+                await createLicenseInDB(key, user, pass, duration);
+                closeModal('customModal');
+            }
+
+            async function createLicenseInDB(key, user, pass, durationType) {
+                const now = new Date();
+                let expires = new Date();
+                if (durationType === 'daily') expires.setDate(now.getDate() + 1);
+                if (durationType === 'weekly') expires.setDate(now.getDate() + 7);
+                if (durationType === 'monthly') expires.setDate(now.getDate() + 30);
+                if (durationType === 'permanent') expires.setFullYear(now.getFullYear() + 100);
+
+                const { error } = await supabase.from('licenses').insert({
+                    license_key: key,
+                    client_username: user,
+                    client_password: pass,
+                    status: 'active',
+                    duration_type: durationType,
+                    expires_at: expires.toISOString(),
+                    locked_ip: null
+                });
+
+                if (error) alert('Error: ' + error.message);
+                else fetchLicenses();
+            }
+
+            async function banKey(id) {
+                if (!confirm('Confirm Ban?')) return;
+                await supabase.from('licenses').update({ status: 'banned' }).eq('id', id);
+                fetchLicenses();
+            }
+
+            async function deleteKey(id) {
+                if (!confirm('Confirm Deletion?')) return;
+                await supabase.from('licenses').delete().eq('id', id);
+                fetchLicenses();
+            }
+
+            async function simularLogin(key, ipDoUsuario) {
+                const resultDiv = document.getElementById('simResult');
+                resultDiv.innerText = 'AUTHENTICATING...';
+                resultDiv.className = 'text-center text-xs font-mono mt-4 h-6 tracking-wider text-yellow-500 animate-pulse';
+
+                const { data, error } = await supabase
                     .from('licenses')
-                    .update({ locked_ip: ipDoUsuario, status: 'active' })
-                    .eq('id', data.id);
+                    .select('*')
+                    .eq('license_key', key)
+                    .single();
 
-                if (updateError) {
-                    resultDiv.innerText = 'DATABASE ERROR';
-                } else {
-                    resultDiv.innerText = 'ACCESS GRANTED [LOCKED TO ' + ipDoUsuario + ']';
-                    resultDiv.className = 'text-center text-xs font-mono mt-4 h-6 tracking-wider text-[#00ff41]';
-                    fetchLicenses();
+                if (error || !data) {
+                    resultDiv.innerText = 'ACCESS DENIED: INVALID KEY';
+                    resultDiv.className = 'text-center text-xs font-mono mt-4 h-6 tracking-wider text-red-500';
+                    return;
                 }
-            } else {
-                if (data.locked_ip === ipDoUsuario) {
-                    resultDiv.innerText = 'ACCESS GRANTED';
-                    resultDiv.className = 'text-center text-xs font-mono mt-4 h-6 tracking-wider text-[#00ff41]';
+
+                if (data.status === 'banned') {
+                    resultDiv.innerText = 'ACCESS DENIED: BANNED';
+                    resultDiv.className = 'text-center text-xs font-mono mt-4 h-6 tracking-wider text-red-600 font-bold';
+                    return;
+                }
+
+                if (new Date() > new Date(data.expires_at)) {
+                    resultDiv.innerText = 'ACCESS DENIED: EXPIRED';
+                    resultDiv.className = 'text-center text-xs font-mono mt-4 h-6 tracking-wider text-orange-500';
+                    return;
+                }
+
+                if (data.locked_ip === null) {
+                    const { error: updateError } = await supabase
+                        .from('licenses')
+                        .update({ locked_ip: ipDoUsuario, status: 'active' })
+                        .eq('id', data.id);
+
+                    if (updateError) {
+                        resultDiv.innerText = 'DATABASE ERROR';
+                    } else {
+                        resultDiv.innerText = 'ACCESS GRANTED [LOCKED TO ' + ipDoUsuario + ']';
+                        resultDiv.className = 'text-center text-xs font-mono mt-4 h-6 tracking-wider text-[#00ff41]';
+                        fetchLicenses();
+                    }
                 } else {
-                    resultDiv.innerText = 'SECURITY ALERT: IP MISMATCH';
-                    resultDiv.className = 'text-center text-xs font-mono mt-4 h-6 tracking-wider text-red-500 font-bold';
+                    if (data.locked_ip === ipDoUsuario) {
+                        resultDiv.innerText = 'ACCESS GRANTED';
+                        resultDiv.className = 'text-center text-xs font-mono mt-4 h-6 tracking-wider text-[#00ff41]';
+                    } else {
+                        resultDiv.innerText = 'SECURITY ALERT: IP MISMATCH';
+                        resultDiv.className = 'text-center text-xs font-mono mt-4 h-6 tracking-wider text-red-500 font-bold';
+                    }
                 }
             }
-        }
 
-        async function runSimulation() {
-            const key = document.getElementById('testKey').value;
-            const ip = document.getElementById('testIP').value;
-            if (!key || !ip) return alert('INPUT REQUIRED');
-            await simularLogin(key, ip);
-        }
+            async function runSimulation() {
+                const key = document.getElementById('testKey').value;
+                const ip = document.getElementById('testIP').value;
+                if (!key || !ip) return alert('INPUT REQUIRED');
+                await simularLogin(key, ip);
+            }
 
-        fetchLicenses();
-        setInterval(fetchLicenses, 30000);
+            fetchLicenses();
+            setInterval(fetchLicenses, 30000);
 
     </script>
 </body>
