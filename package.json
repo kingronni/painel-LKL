@@ -1,0 +1,15 @@
+{
+  "name": "painel-lkl-keys",
+  "version": "1.0.0",
+  "description": "Painel de controle de keys com API serverless",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0"
+  },
+  "engines": {
+    "node": "18.x"
+  }
+}
