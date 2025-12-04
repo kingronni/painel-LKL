@@ -20,6 +20,7 @@ ALTER TABLE licenses ADD COLUMN IF NOT EXISTS client_username TEXT;
 ALTER TABLE licenses ADD COLUMN IF NOT EXISTS client_password TEXT;
 ALTER TABLE licenses ADD COLUMN IF NOT EXISTS max_ips INTEGER DEFAULT 1;
 ALTER TABLE licenses ADD COLUMN IF NOT EXISTS used_ips JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE licenses ADD COLUMN IF NOT EXISTS order_id TEXT;
 
 -- Create settings table for global server status
 CREATE TABLE IF NOT EXISTS settings (

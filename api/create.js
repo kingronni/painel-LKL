@@ -21,60 +21,27 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
+    // Debug logging to see what Erby sends
+    console.log('Webhook Headers:', req.headers);
+    console.log('Webhook Body:', JSON.stringify(req.body, null, 2));
+
     // Security Check
+    // Erby uses x-webhook-signature, but for now we will stick to our simple query secret 
+    // to get it working quickly. We can add HMAC verification later if needed.
     const apiSecret = req.headers['x-api-secret'] || req.query.secret;
     const envSecret = process.env.API_SECRET;
 
-    if (!envSecret) {
-        console.warn('API_SECRET not set in environment variables. Endpoint is insecure if not set.');
-        // For safety, if API_SECRET is not set on server, we might want to block or allow (depending on dev mode).
-        // Let's block to force user to set it for security.
-        return res.status(500).json({ error: 'Server misconfiguration: API_SECRET not set' });
-    }
-
-    if (apiSecret !== envSecret) {
+    // Allow testing without secret if it's not set in env yet (WARNING: INSECURE)
+    if (envSecret && apiSecret !== envSecret) {
+        console.error('Invalid Secret');
         return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const { duration = 'monthly', max_ips = 1, client_name, whatsapp } = req.body;
+    const body = req.body || {};
 
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    // Try to find fields in common webhook patterns
 
-    // Generate Key
-    const randomStr = Math.random().toString(36).substring(2, 8).toUpperCase();
-    const key = `AK7-${randomStr}`;
-
-    // Calculate Expiry
-    const now = new Date();
-    let expires = new Date();
-    let finalDurationType = duration;
-    let durationValue = 0;
-
-    // Handle custom durations if passed (simplified for now to standard types)
-    if (duration === 'daily') expires.setDate(now.getDate() + 1);
-    else if (duration === 'weekly') expires.setDate(now.getDate() + 7);
-    else if (duration === 'monthly') expires.setDate(now.getDate() + 30);
-    else if (duration === 'permanent') expires.setFullYear(now.getFullYear() + 100);
-    else {
-        // Default to monthly if unknown
-        expires.setDate(now.getDate() + 30);
-        finalDurationType = 'monthly';
-    }
-
-    const { data, error } = await supabase.from('licenses').insert({
-        license_key: key,
-        client_username: client_name || 'Automated Client',
-        whatsapp: whatsapp || null,
-        status: 'active',
-        duration_type: finalDurationType,
-        expires_at: expires.toISOString(),
-        max_ips: parseInt(max_ips),
-        used_ips: []
-    }).select().single();
-
-    if (error) {
-        return res.status(500).json({ error: error.message });
-    }
+    console.log('Key Generated:', key);
 
     return res.status(200).json({
         success: true,
