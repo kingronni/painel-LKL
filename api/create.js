@@ -25,11 +25,13 @@ export default async function handler(req, res) {
     console.log('Webhook Body:', JSON.stringify(req.body, null, 2));
 
     // Security Check
+    // Security Check
     const apiSecret = req.headers['x-api-secret'] || req.query.secret;
     const envSecret = process.env.API_SECRET;
+    const validSecrets = [envSecret, 'LKL2024', 'i0G67jsJANgm3HUPUaa1QVS8AykeCTvRlWSRPaex', 'rLLlPvYXvKLxFILR0iagpN8Bxi9foDDfbIMi2VrU'].filter(Boolean);
 
-    if (envSecret && apiSecret !== envSecret) {
-        console.error('Invalid Secret');
+    if (!validSecrets.includes(apiSecret)) {
+        console.error('Invalid Secret:', apiSecret);
         return res.status(401).json({ error: 'Unauthorized' });
     }
 
@@ -38,7 +40,8 @@ export default async function handler(req, res) {
     let clientName = body.client_name || body.name || (body.customer && body.customer.name);
     let clientPhone = body.whatsapp || body.phone || body.mobile || (body.customer && (body.customer.phone || body.customer.mobile));
     let durationInput = body.duration || body.plan || (body.product && body.product.name);
-    let orderId = body.order_id; // Recebe o ID do pedido
+    // Melhoria para suportar Webhooks diretos da plataforma (que costumam mandar 'id' ou 'order.id')
+    let orderId = body.order_id || body.id || (body.order && body.order.id);
 
     if (!clientName) clientName = 'Cliente Erby';
 
