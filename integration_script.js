@@ -1,10 +1,9 @@
-```javascript
 // =================================================================
 // SCRIPT DE INTEGRAÇÃO LKL - COLE ISSO NO "SCRIPT GLOBAL" (JAVASCRIPT)
 // =================================================================
 
 (function () {
-    console.log('LKL Script: Iniciado v3.0 (Persistência)');
+    console.log('LKL Script: Iniciado v3.1 (Fix Syntax)');
 
     // Chave única para salvar no navegador baseada na URL (para não misturar pedidos)
     const STORAGE_KEY = 'lkl_key_' + window.location.pathname.split('/').pop();
@@ -170,10 +169,10 @@
                 if (data.success) {
                     // SALVA NO NAVEGADOR
                     localStorage.setItem(STORAGE_KEY, data.key);
-                    
+
                     // MOSTRA A CAIXINHA PERMANENTE
                     createKeyDisplay(data.key);
-                    
+
                 } else {
                     alert('Erro ao gerar key: ' + (data.error || 'Desconhecido'));
                     btn.innerHTML = '❌ ERRO';
@@ -192,9 +191,8 @@
 
     // Roda a verificação a cada 1 segundo (para lidar com carregamento lento ou SPA)
     setInterval(tryInjectButton, 1000);
-    
+
     // Tenta rodar imediatamente também
     tryInjectButton();
 
 })();
-```
