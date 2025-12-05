@@ -43,7 +43,10 @@ export default async function handler(req, res) {
     // Melhoria para suportar Webhooks diretos da plataforma (que costumam mandar 'id' ou 'order.id')
     let orderId = body.order_id || body.id || (body.order && body.order.id);
 
-    if (!clientName) clientName = 'Cliente Erby';
+    if (!clientName) {
+        const uniqueSuffix = Math.random().toString(36).substring(2, 6).toUpperCase();
+        clientName = `Cliente Erby ${uniqueSuffix}`;
+    }
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
@@ -69,7 +72,7 @@ export default async function handler(req, res) {
 
     // Generate Key
     const randomStr = Math.random().toString(36).substring(2, 8).toUpperCase();
-    const key = `AK7-${randomStr}`;
+    const key = `LKL-${randomStr}`;
 
     // Calculate Expiry
     const now = new Date();
