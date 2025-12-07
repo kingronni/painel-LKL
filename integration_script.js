@@ -3,19 +3,32 @@
 // =================================================================
 
 (function () {
-    console.log('LKL Script: Iniciado v3.1 (Fix Syntax)');
+    console.log('LKL Script: Iniciado v4.0 (SPA Fix)');
 
-    // Chave única para salvar no navegador baseada na URL (para não misturar pedidos)
-    const STORAGE_KEY = 'lkl_key_' + window.location.pathname.split('/').pop();
+    // Funções auxiliares para pegar ID e Key atuais
+    function getOrderId() {
+        return window.location.pathname.split('/').pop();
+    }
 
-    function createKeyDisplay(keyText) {
-        // Remove botão antigo se existir
+    function getStorageKey() {
+        return 'lkl_key_' + getOrderId();
+    }
+
+    function removeOldElements() {
         const oldBtn = document.getElementById('lkl-key-btn');
         if (oldBtn) oldBtn.remove();
+        const oldContainer = document.getElementById('lkl-key-container');
+        if (oldContainer) oldContainer.remove();
+    }
+
+    function createKeyDisplay(keyText, orderId) {
+        // Garante que não tem nada antigo
+        removeOldElements();
 
         // Cria container da key
         const container = document.createElement('div');
         container.id = 'lkl-key-container';
+        container.dataset.orderId = orderId; // Marca de qual pedido é essa key
         container.style.position = 'fixed';
         container.style.bottom = '20px';
         container.style.right = '20px';
@@ -79,26 +92,46 @@
     function tryInjectButton() {
         // 1. Verifica se estamos na página de pagamento/sucesso
         if (!window.location.href.includes('/payment/')) {
+            // Se o usuário saiu da página de pagamento, limpa os elementos da tela
+            removeOldElements();
             return;
         }
 
-        // Se já temos a key salva, mostra ela direto!
-        const savedKey = localStorage.getItem(STORAGE_KEY);
+        const currentOrderId = getOrderId();
+        const currentStorageKey = getStorageKey();
+
+        // 2. Limpeza de elementos de pedidos ANTIGOS (caso o usuário troque de página sem recarregar)
+        const existingBtn = document.getElementById('lkl-key-btn');
+        const existingContainer = document.getElementById('lkl-key-container');
+
+        if (existingContainer && existingContainer.dataset.orderId !== currentOrderId) {
+            console.log('Removendo key de pedido anterior...');
+            existingContainer.remove();
+        }
+        if (existingBtn && existingBtn.dataset.orderId !== currentOrderId) {
+            console.log('Removendo botão de pedido anterior...');
+            existingBtn.remove();
+        }
+
+        // 3. Se já tem o container do pedido ATUAL, não faz nada
+        if (document.getElementById('lkl-key-container')) return;
+
+        // 4. Se já temos a key salva para ESTE pedido, mostra ela
+        const savedKey = localStorage.getItem(currentStorageKey);
         if (savedKey) {
-            if (!document.getElementById('lkl-key-container')) {
-                createKeyDisplay(savedKey);
-            }
+            createKeyDisplay(savedKey, currentOrderId);
             return;
         }
 
-        // Se o botão já existe, não cria de novo
+        // 5. Se o botão já existe (e é do pedido certo), não cria de novo
         if (document.getElementById('lkl-key-btn')) return;
 
-        console.log('LKL Script: Página de pagamento detectada! Criando botão...');
+        console.log('LKL Script: Novo pedido detectado:', currentOrderId);
 
-        // 2. Cria o botão flutuante
+        // 6. Cria o botão flutuante
         const btn = document.createElement('button');
         btn.id = 'lkl-key-btn'; // ID para evitar duplicatas
+        btn.dataset.orderId = currentOrderId; // Marca de qual pedido é esse botão
         btn.innerHTML = '🔑 RESGATAR MINHA KEY';
         btn.style.position = 'fixed';
         btn.style.bottom = '20px';
@@ -120,7 +153,7 @@
         btn.onmouseover = () => { btn.style.transform = 'scale(1.05)'; };
         btn.onmouseout = () => { btn.style.transform = 'scale(1)'; };
 
-        // 3. Função ao clicar
+        // 7. Função ao clicar
         btn.onclick = async function () {
             btn.innerHTML = '⏳ GERANDO...';
             btn.disabled = true;
@@ -147,9 +180,6 @@
 
             console.log('Gerando key do tipo:', durationType);
 
-            // Pega o ID do pedido da URL (mesmo que usamos para o localStorage)
-            const orderId = window.location.pathname.split('/').pop();
-
             try {
                 const response = await fetch('https://painel-lkl.vercel.app/api/create?secret=LKL2024', {
                     method: 'POST',
@@ -160,18 +190,18 @@
                         client_name: clientName,
                         whatsapp: clientPhone,
                         duration: durationType,
-                        order_id: orderId // Envia o ID para o backend travar
+                        order_id: currentOrderId // Usa o ID atualizado
                     })
                 });
 
                 const data = await response.json();
 
                 if (data.success) {
-                    // SALVA NO NAVEGADOR
-                    localStorage.setItem(STORAGE_KEY, data.key);
+                    // SALVA NO NAVEGADOR COM A CHAVE CERTA
+                    localStorage.setItem(currentStorageKey, data.key);
 
                     // MOSTRA A CAIXINHA PERMANENTE
-                    createKeyDisplay(data.key);
+                    createKeyDisplay(data.key, currentOrderId);
 
                 } else {
                     alert('Erro ao gerar key: ' + (data.error || 'Desconhecido'));
