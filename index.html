@@ -560,6 +560,42 @@
         </div>
     </div>
 
+    <!-- ADD CREDIT MODAL -->
+    <div id="addCreditModal"
+        class="fixed inset-0 bg-black/95 backdrop-blur-md hidden flex items-center justify-center z-50 p-4">
+        <div
+            class="glass-panel p-8 rounded w-full max-w-md border border-green-500 shadow-[0_0_50px_rgba(0,255,65,0.2)]">
+            <h2
+                class="text-xl font-bold text-green-500 mb-6 tracking-widest uppercase border-b border-green-900/50 pb-2">
+                Gerenciar Saldo</h2>
+            <div class="space-y-4">
+                <input type="hidden" id="creditResellerId">
+                <p class="text-gray-400 text-sm">Revendedor: <span id="creditResellerName"
+                        class="text-white font-bold"></span></p>
+                <p class="text-gray-400 text-sm mb-4">Saldo Atual: <span id="creditCurrentBalance"
+                        class="text-yellow-500 font-mono font-bold"></span></p>
+
+                <div>
+                    <label class="block text-xs text-green-700 mb-1 uppercase font-bold">Valor para Adicionar (ou
+                        remover com -)</label>
+                    <input type="number" id="creditAmount" placeholder="Ex: 50.00"
+                        class="w-full bg-black/50 border border-gray-800 text-white p-2 text-sm focus:border-green-500 outline-none transition-colors">
+                </div>
+
+                <div class="flex gap-3 pt-4">
+                    <button onclick="saveCredit()"
+                        class="flex-1 bg-green-900/20 border border-green-500 text-green-500 py-2 text-sm font-bold hover:bg-green-500 hover:text-black transition uppercase">
+                        Confirmar
+                    </button>
+                    <button onclick="closeModal('addCreditModal')"
+                        class="flex-1 border border-gray-800 text-gray-500 py-2 text-sm hover:bg-gray-800 transition uppercase">
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         const SUPABASE_URL = 'https://ilwfeyzkaehkfgkxtciq.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlsd2ZleXprYWVoa2Zna3h0Y2lxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ1NDQxNDcsImV4cCI6MjA4MDEyMDE0N30.eK5-Ut91eYVmSgE9-v-zsHZ5lQB7xzVaJZyfXK8qhiM';
@@ -899,7 +935,10 @@
                     <td class="p-4 font-bold text-white">${reseller.name || '---'}</td>
                     <td class="p-4">${reseller.email || reseller.contact || '---'}</td>
                     <td class="p-4 text-green-500 font-mono">R$ ${reseller.balance || '0.00'}</td>
-                    <td class="p-4 text-right">
+                    <td class="p-4 text-right flex justify-end gap-2">
+                        <button onclick="openAddCreditModal('${reseller.id}', '${reseller.name}', ${reseller.balance || 0})" class="text-green-500 hover:text-green-300 transition font-bold uppercase text-xs border border-green-900/50 px-3 py-1 hover:bg-green-900/20">
+                            + CRÉDITOS
+                        </button>
                         <button onclick="deleteReseller('${reseller.id}')" class="text-red-500 hover:text-red-300 transition font-bold uppercase text-xs border border-red-900/50 px-3 py-1 hover:bg-red-900/20">
                             DELETAR
                         </button>
@@ -955,6 +994,51 @@
             } else {
                 alert('Limpeza concluída com sucesso!');
                 fetchLicenses();
+            }
+
+        }
+
+        // CREDIT FUNCTIONS
+        function openAddCreditModal(id, name, currentBalance) {
+            document.getElementById('creditResellerId').value = id;
+            document.getElementById('creditResellerName').textContent = name;
+            document.getElementById('creditCurrentBalance').textContent = 'R$ ' + parseFloat(currentBalance).toFixed(2);
+            document.getElementById('creditAmount').value = '';
+            openModal('addCreditModal');
+        }
+
+        async function saveCredit() {
+            const id = document.getElementById('creditResellerId').value;
+            const amountStr = document.getElementById('creditAmount').value;
+            const amount = parseFloat(amountStr);
+
+            if (isNaN(amount) || amount === 0) return alert('Insira um valor válido');
+
+            // 1. Get current balance again to be safe
+            const { data: res, error: fetchError } = await supabaseClient.from('resellers').select('balance').eq('id', id).single();
+            if (fetchError) return alert('Erro ao buscar saldo: ' + fetchError.message);
+
+            const current = parseFloat(res.balance || 0);
+            const newBalance = current + amount;
+
+            // 2. Update Balance
+            const { error: updateError } = await supabaseClient.from('resellers').update({ balance: newBalance }).eq('id', id);
+
+            if (updateError) {
+                alert('Erro ao atualizar saldo: ' + updateError.message);
+            } else {
+                // 3. Log Transaction
+                await supabaseClient.from('credit_transactions').insert({
+                    reseller_id: id,
+                    amount: amount,
+                    type: amount > 0 ? 'add' : 'deduct',
+                    description: 'Adicionado via Painel Principal',
+                    created_at: new Date().toISOString()
+                });
+
+                alert('Saldo atualizado com sucesso!');
+                closeModal('addCreditModal');
+                fetchResellers();
             }
         }
     </script>
