@@ -357,6 +357,18 @@
             </div>
         </div>
 
+        <!-- TABS FOR KEYS -->
+        <div class="w-full max-w-7xl flex gap-4 mb-4 z-10">
+            <button onclick="switchTab('mine')" id="tabMine"
+                class="flex-1 py-3 border-b-2 border-green-500 text-green-500 font-bold uppercase tracking-widest bg-green-900/10 transition">
+                Minhas Chaves
+            </button>
+            <button onclick="switchTab('resellers')" id="tabResellers"
+                class="flex-1 py-3 border-b-2 border-gray-800 text-gray-500 font-bold uppercase tracking-widest hover:bg-gray-800/30 transition">
+                Revendedores
+            </button>
+        </div>
+
         <!-- Data Table -->
         <div class="w-full max-w-7xl glass-panel border border-gray-800 overflow-hidden z-10">
             <div class="overflow-x-auto">
@@ -593,11 +605,56 @@
         </div>
     </div>
 
+    <!-- CUSTOM COST MODAL -->
+    <div id="customCostModal"
+        class="fixed inset-0 bg-black/95 backdrop-blur-md hidden flex items-center justify-center z-50 p-4">
+        <div
+            class="glass-panel p-8 rounded w-full max-w-md border border-purple-500 shadow-[0_0_50px_rgba(188,19,254,0.2)]">
+            <h2
+                class="text-xl font-bold text-purple-500 mb-6 tracking-widest uppercase border-b border-purple-900/50 pb-2">
+                Custos Personalizados</h2>
+            <div class="space-y-4">
+                <input type="hidden" id="costResellerId">
+                <p class="text-gray-400 text-sm">Revendedor: <span id="costResellerName"
+                        class="text-white font-bold"></span></p>
+                <p class="text-xs text-gray-500 italic mb-4">Deixe em branco para usar o padrão do sistema.</p>
+
+                <div>
+                    <label class="block text-xs text-purple-700 mb-1 uppercase font-bold">Diário (Créditos)</label>
+                    <input type="number" id="costDaily" placeholder="Padrão do Sistema" step="0.1"
+                        class="w-full bg-black/50 border border-gray-800 text-white p-2 text-sm focus:border-purple-500 outline-none transition-colors">
+                </div>
+                <div>
+                    <label class="block text-xs text-purple-700 mb-1 uppercase font-bold">Semanal (Créditos)</label>
+                    <input type="number" id="costWeekly" placeholder="Padrão do Sistema" step="0.1"
+                        class="w-full bg-black/50 border border-gray-800 text-white p-2 text-sm focus:border-purple-500 outline-none transition-colors">
+                </div>
+                <div>
+                    <label class="block text-xs text-purple-700 mb-1 uppercase font-bold">Mensal (Créditos)</label>
+                    <input type="number" id="costMonthly" placeholder="Padrão do Sistema" step="0.1"
+                        class="w-full bg-black/50 border border-gray-800 text-white p-2 text-sm focus:border-purple-500 outline-none transition-colors">
+                </div>
+
+                <div class="flex gap-3 pt-4">
+                    <button onclick="saveCustomCosts()"
+                        class="flex-1 bg-purple-900/20 border border-purple-500 text-purple-500 py-2 text-sm font-bold hover:bg-purple-500 hover:text-black transition uppercase">
+                        Salvar
+                    </button>
+                    <button onclick="closeModal('customCostModal')"
+                        class="flex-1 border border-gray-800 text-gray-500 py-2 text-sm hover:bg-gray-800 transition uppercase">
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         const SUPABASE_URL = 'https://ilwfeyzkaehkfgkxtciq.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlsd2ZleXprYWVoa2Zna3h0Y2lxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ1NDQxNDcsImV4cCI6MjA4MDEyMDE0N30.eK5-Ut91eYVmSgE9-v-zsHZ5lQB7xzVaJZyfXK8qhiM';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         let allLicenses = [];
+        let activeTab = 'mine'; // 'mine' or 'resellers'
 
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('currentDate').innerText = new Date().toLocaleDateString('pt-BR');
@@ -703,17 +760,47 @@
             if (error) { console.error('Erro:', error); return; }
             allLicenses = data;
             renderTable(data);
+            renderTable(data);
             updateStats(data);
+        }
+
+        function switchTab(tab) {
+            activeTab = tab;
+            const btnMine = document.getElementById('tabMine');
+            const btnResellers = document.getElementById('tabResellers');
+
+            if (tab === 'mine') {
+                btnMine.classList.remove('border-gray-800', 'text-gray-500');
+                btnMine.classList.add('border-green-500', 'text-green-500', 'bg-green-900/10');
+                btnResellers.classList.add('border-gray-800', 'text-gray-500');
+                btnResellers.classList.remove('border-yellow-500', 'text-yellow-500', 'bg-yellow-900/10');
+            } else {
+                btnResellers.classList.remove('border-gray-800', 'text-gray-500');
+                btnResellers.classList.add('border-yellow-500', 'text-yellow-500', 'bg-yellow-900/10');
+                btnMine.classList.add('border-gray-800', 'text-gray-500');
+                btnMine.classList.remove('border-green-500', 'text-green-500', 'bg-green-900/10');
+            }
+            filterTable(); // Re-render with new tab
         }
 
         function renderTable(data) {
             const tbody = document.getElementById('licenseTableBody');
             tbody.innerHTML = '';
-            if (data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="p-12 text-center text-gray-700 uppercase text-xs tracking-widest">Nenhum dado encontrado no sistema</td></tr>';
+
+            // Filter by active tab
+            let filtered = data;
+            if (activeTab === 'mine') {
+                filtered = data.filter(l => !l.reseller_id);
+            } else {
+                filtered = data.filter(l => l.reseller_id); // Show only reseller keys
+            }
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="p-12 text-center text-gray-700 uppercase text-xs tracking-widest">Nenhum dado encontrado para esta aba</td></tr>';
                 return;
             }
-            data.forEach(lic => {
+
+            filtered.forEach(lic => {
                 const tr = document.createElement('tr');
                 tr.className = 'table-row-hover border-b border-gray-800/30 transition-colors cursor-default';
                 const expires = new Date(lic.expires_at);
@@ -732,15 +819,18 @@
                 const usedIPs = lic.used_ips ? lic.used_ips.length : 0;
                 const ipStatusColor = usedIPs >= maxIPs ? 'text-red-500' : 'text-green-500';
 
+                // Fix Name Display (Admin vs Reseller)
+                const clientName = lic.client_username || lic.client_name || '---';
+
                 tr.innerHTML = `
                     <td class="p-4 select-text">${statusHtml}</td>
-                    <td class="p-4 font-bold text-white select-text">${lic.client_username || '---'}</td>
+                    <td class="p-4 font-bold text-white select-text">${clientName}</td>
                     <td class="p-4 text-gray-400 font-mono text-xs select-text">${lic.whatsapp || '---'}</td>
                     <td class="p-4 text-xs uppercase text-blue-400 select-text">${planLabel}</td>
                     <td class="p-4 text-xs font-mono ${ipStatusColor} select-text">${usedIPs}/${maxIPs}</td>
                     <td class="p-4 text-xs font-mono text-gray-500 select-text">${dateStr}</td>
                     <td class="p-4 text-right">
-                        <button onclick="openEditModal('${lic.id}', '${lic.client_username || ''}')" class="text-blue-500 hover:text-white mr-3 transition" title="Editar"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></button>
+                        <button onclick="openEditModal('${lic.id}', '${clientName}')" class="text-blue-500 hover:text-white mr-3 transition" title="Editar"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></button>
                         <button onclick="resetIP('${lic.id}')" class="text-yellow-500 hover:text-white mr-3 transition" title="Resetar IP"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg></button>
                         <button onclick="copyKey('${lic.license_key}')" class="text-gray-600 hover:text-white mr-3 transition" title="Copiar Key"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg></button>
                         <button onclick="deleteKey('${lic.id}')" class="text-red-900 hover:text-red-500 transition" title="Deletar"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
@@ -858,12 +948,17 @@
 
         function filterTable() {
             const term = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = allLicenses.filter(lic =>
+
+            // First filter by Search Term (on all licenses)
+            const searched = allLicenses.filter(lic =>
                 (lic.client_username && lic.client_username.toLowerCase().includes(term)) ||
+                (lic.client_name && lic.client_name.toLowerCase().includes(term)) ||
                 (lic.whatsapp && lic.whatsapp.includes(term)) ||
                 (lic.license_key && lic.license_key.toLowerCase().includes(term))
             );
-            renderTable(filtered);
+
+            // Then render (renderTable will handle tab filtering)
+            renderTable(searched);
         }
 
         function filterStatus(type) {
@@ -992,50 +1087,279 @@
                 alert('Limpeza concluída com sucesso!');
                 fetchLicenses();
             }
+        }
+
+        async function createCustomKey() {
+            const user = document.getElementById('custUser').value;
+            const pass = document.getElementById('custPass').value;
+            const duration = document.getElementById('custDuration').value;
+            if (!user || !pass) return alert('Usuário e Senha são obrigatórios');
+            const randomStr = Math.random().toString(36).substring(2, 6).toUpperCase();
+            const key = `LKL-CUST-${randomStr}`;
+            await insertLicense(key, user, pass, null, duration);
+            closeModal('customModal');
+            document.getElementById('custUser').value = '';
+            document.getElementById('custPass').value = '';
+        }
+
+        async function insertLicense(key, user, pass, phone, duration, durationValue, maxIPs) {
+            const now = new Date();
+            let expires = new Date();
+            let finalDurationType = duration;
+
+            if (duration === 'daily') expires.setDate(now.getDate() + 1);
+            else if (duration === 'weekly') expires.setDate(now.getDate() + 7);
+            else if (duration === 'monthly') expires.setDate(now.getDate() + 30);
+            else if (duration === 'permanent') expires.setFullYear(now.getFullYear() + 100);
+            else if (duration === 'custom_hours') {
+                expires.setHours(now.getHours() + parseInt(durationValue));
+                finalDurationType = 'custom';
+            }
+            else if (duration === 'custom_days') {
+                expires.setDate(now.getDate() + parseInt(durationValue));
+                finalDurationType = 'custom';
+            }
+
+            const { error } = await supabaseClient.from('licenses').insert({
+                license_key: key,
+                client_username: user,
+                client_password: pass,
+                whatsapp: phone,
+                status: 'active',
+                duration_type: finalDurationType,
+                expires_at: expires.toISOString(),
+                max_ips: parseInt(maxIPs || 1),
+                used_ips: []
+            });
+            if (error) alert('Erro ao criar: ' + error.message);
+            else fetchLicenses();
+        }
+
+        async function deleteKey(id) {
+            if (!confirm('Tem certeza que deseja deletar este cliente?')) return;
+            await supabaseClient.from('licenses').delete().eq('id', id);
+            fetchLicenses();
+        }
+
+        async function resetIP(id) {
+            if (!confirm('Deseja resetar o IP deste cliente?')) return;
+            const { error } = await supabaseClient
+                .from('licenses')
+                .update({ used_ips: [] })
+                .eq('id', id);
+
+            if (error) alert('Erro ao resetar IP: ' + error.message);
+            else {
+                alert('IP resetado com sucesso!');
+                fetchLicenses();
+            }
+        }
+
+        function copyKey(key) {
+            navigator.clipboard.writeText(key).then(() => alert('Key copiada: ' + key));
+        }
+
+        function filterTable() {
+            const term = document.getElementById('searchInput').value.toLowerCase();
+
+            // First filter by Search Term (on all licenses)
+            const searched = allLicenses.filter(lic =>
+                (lic.client_username && lic.client_username.toLowerCase().includes(term)) ||
+                (lic.client_name && lic.client_name.toLowerCase().includes(term)) ||
+                (lic.whatsapp && lic.whatsapp.includes(term)) ||
+                (lic.license_key && lic.license_key.toLowerCase().includes(term))
+            );
+
+            // Then render (renderTable will handle tab filtering)
+            renderTable(searched);
+        }
+
+        function filterStatus(type) {
+            if (type === 'all') renderTable(allLicenses);
+            else if (type === 'monthly') renderTable(allLicenses.filter(l => l.duration_type === 'monthly'));
+            else if (type === 'permanent') renderTable(allLicenses.filter(l => l.duration_type === 'permanent'));
+        }
+
+        function toggleCustomDuration(value) {
+            const input = document.getElementById('newClientDurationValue');
+            if (value === 'custom_hours' || value === 'custom_days') {
+                input.classList.remove('hidden');
+                input.classList.add('w-2/3');
+                document.getElementById('newClientDuration').classList.remove('w-full');
+                document.getElementById('newClientDuration').classList.add('w-1/3');
+            } else {
+                input.classList.add('hidden');
+                document.getElementById('newClientDuration').classList.add('w-full');
+                document.getElementById('newClientDuration').classList.remove('w-1/3');
+            }
+        }
+
+        async function fetchServerStatus() {
+            const { data, error } = await supabaseClient.from('settings').select('value').eq('key', 'server_status').single();
+            if (data && data.value) {
+                document.getElementById('serverStatusToggle').checked = data.value.enabled;
+            }
+        }
+
+        async function toggleServerStatus() {
+            const isEnabled = document.getElementById('serverStatusToggle').checked;
+            const { error } = await supabaseClient.from('settings').upsert({ key: 'server_status', value: { enabled: isEnabled } });
+            if (error) {
+                alert('Erro ao atualizar status do servidor');
+                document.getElementById('serverStatusToggle').checked = !isEnabled; // Revert
+            }
+        }
+
+        // RESELLER MANAGEMENT
+        async function openResellersModal() {
+            openModal('resellersModal');
+            getResellers();
+        }
+
+        async function getResellers() {
+            const { data, error } = await supabaseClient.from('resellers').select('*').order('created_at', { ascending: false });
+            if (error) { console.error(error); return; }
+            const tbody = document.getElementById('resellersTableBody');
+            tbody.innerHTML = '';
+            data.forEach(r => {
+                const tr = document.createElement('tr');
+                tr.className = 'border-b border-gray-800/30';
+                tr.innerHTML = `
+                <td class="p-4">${r.name}</td>
+                <td class="p-4 text-xs text-gray-500">${r.email || '---'}</td>
+                <td class="p-4 font-mono text-yellow-500">${r.balance || 0}</td>
+                <td class="p-4 text-right flex justify-end gap-2">
+                     <button onclick="openCreditModal('${r.id}', '${r.name}', ${r.balance || 0})" class="px-2 py-1 text-xs border border-green-900 text-green-500 hover:bg-green-900 transition uppercase">+ Saldo</button>
+                     <button onclick="openCostModal('${r.id}', '${r.name}')" class="px-2 py-1 text-xs border border-purple-900 text-purple-500 hover:bg-purple-900 transition uppercase" title="Custos">💲 Custos</button>
+                     <button onclick="deleteReseller('${r.id}')" class="px-2 py-1 text-xs border border-red-900 text-red-500 hover:bg-red-900 transition uppercase">Excluir</button>
+                </td>
+            `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function deleteReseller(id) {
+            if (confirm('Tem certeza que deseja excluir este revendedor?')) {
+                supabaseClient.from('resellers').delete().eq('id', id).then(({ error }) => {
+                    if (error) alert('Erro ao excluir');
+                    else getResellers();
+                });
+            }
+        }
+
+
+        // SETTINGS FUNCTIONS
+        async function backupKeys() {
+            const { data, error } = await supabaseClient.from('licenses').select('*');
+            if (error) return alert('Erro ao buscar dados: ' + error.message);
+
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "lkl_backup_keys_" + new Date().toISOString() + ".json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+
+        async function cleanExpiredKeys() {
+            if (!confirm('ATENÇÃO: Todas as chaves marcadas como "expired" ou com data de validade passada serão DELETADAS PERMANENTEMENTE. Continuar?')) return;
+
+            const now = new Date().toISOString();
+
+            // 1. Delete status = 'expired'
+            const { error: err1 } = await supabaseClient.from('licenses').delete().eq('status', 'expired');
+
+            // 2. Delete expires_at < now (and not permanent)
+            const { error: err2 } = await supabaseClient.from('licenses').delete().lt('expires_at', now).neq('duration_type', 'permanent');
+
+            if (err1 || err2) {
+                alert('Ocorreu um erro durante a limpeza. Verifique o console.');
+                console.error(err1, err2);
+            } else {
+                alert('Limpeza concluída com sucesso!');
+                fetchLicenses();
+            }
 
         }
 
         // CREDIT FUNCTIONS
-        function openAddCreditModal(id, name, currentBalance) {
+        function openCreditModal(id, name, balance) {
             document.getElementById('creditResellerId').value = id;
             document.getElementById('creditResellerName').textContent = name;
-            document.getElementById('creditCurrentBalance').textContent = 'R$ ' + parseFloat(currentBalance).toFixed(2);
-            document.getElementById('creditAmount').value = '';
+            document.getElementById('creditCurrentBalance').textContent = balance;
             openModal('addCreditModal');
         }
 
         async function saveCredit() {
             const id = document.getElementById('creditResellerId').value;
-            const amountStr = document.getElementById('creditAmount').value;
-            const amount = parseFloat(amountStr);
+            const amount = parseFloat(document.getElementById('creditAmount').value);
+            if (!amount) return alert('Valor inválido');
 
-            if (isNaN(amount) || amount === 0) return alert('Insira um valor válido');
-
-            // 1. Get current balance again to be safe
-            const { data: res, error: fetchError } = await supabaseClient.from('resellers').select('balance').eq('id', id).single();
-            if (fetchError) return alert('Erro ao buscar saldo: ' + fetchError.message);
-
-            const current = parseFloat(res.balance || 0);
+            // 1. Get current balance
+            const { data: res } = await supabaseClient.from('resellers').select('balance').eq('id', id).single();
+            const current = res.balance || 0;
             const newBalance = current + amount;
 
-            // 2. Update Balance
-            const { error: updateError } = await supabaseClient.from('resellers').update({ balance: newBalance }).eq('id', id);
+            // 2. Update Reseller
+            const { error } = await supabaseClient.from('resellers').update({ balance: newBalance }).eq('id', id);
 
-            if (updateError) {
-                alert('Erro ao atualizar saldo: ' + updateError.message);
+            if (error) {
+                alert('Erro ao atualizar saldo');
             } else {
                 // 3. Log Transaction
                 await supabaseClient.from('credit_transactions').insert({
                     reseller_id: id,
                     amount: amount,
                     type: amount > 0 ? 'add' : 'deduct',
-                    description: 'Adicionado via Painel Principal',
-                    created_at: new Date().toISOString()
+                    description: 'Manual adjustment by Admin'
                 });
 
-                alert('Saldo atualizado com sucesso!');
                 closeModal('addCreditModal');
-                fetchResellers();
+                getResellers();
+                alert('Saldo atualizado com sucesso!');
+            }
+        }
+
+        // CUSTOM COSTS LOGIC
+        async function openCostModal(id, name) {
+            document.getElementById('costResellerId').value = id;
+            document.getElementById('costResellerName').textContent = name;
+
+            // Fetch current custom costs
+            const { data } = await supabaseClient.from('resellers').select('custom_costs').eq('id', id).single();
+            const costs = data?.custom_costs || {};
+
+            document.getElementById('costDaily').value = costs.daily || '';
+            document.getElementById('costWeekly').value = costs.weekly || '';
+            document.getElementById('costMonthly').value = costs.monthly || '';
+
+            openModal('customCostModal');
+        }
+
+        async function saveCustomCosts() {
+            const id = document.getElementById('costResellerId').value;
+            const daily = document.getElementById('costDaily').value;
+            const weekly = document.getElementById('costWeekly').value;
+            const monthly = document.getElementById('costMonthly').value;
+
+            // Build JSON object, converting to float or null if empty
+            const customCosts = {};
+            if (daily) customCosts.daily = parseFloat(daily);
+            if (weekly) customCosts.weekly = parseFloat(weekly);
+            if (monthly) customCosts.monthly = parseFloat(monthly);
+
+            // If object is empty (all fields cleared), save as null to revert to default
+            const payload = Object.keys(customCosts).length > 0 ? customCosts : null;
+
+            const { error } = await supabaseClient.from('resellers').update({ custom_costs: payload }).eq('id', id);
+
+            if (error) {
+                console.error(error);
+                alert('Erro ao salvar custos.');
+            } else {
+                alert('Custos atualizados com sucesso!');
+                closeModal('customCostModal');
             }
         }
     </script>
