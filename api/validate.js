@@ -17,10 +17,12 @@ export default async function handler(req, res) {
         return;
     }
 
-    const { key, ip } = req.query; // Or req.body
+    const { key, device_id } = req.query; // Support query for GET
+    const body = req.body || {};
+    const deviceId = device_id || body.device_id;
 
-    if (!key || !ip) {
-        return res.status(400).json({ valid: false, message: 'Missing key or IP' });
+    if (!key || !deviceId) {
+        return res.status(400).json({ valid: false, message: 'Missing key or device_id' });
     }
 
     const supabase = createClient(supabaseUrl, supabaseKey);
@@ -49,30 +51,30 @@ export default async function handler(req, res) {
         return res.status(403).json({ valid: false, message: 'Key expired' });
     }
 
-    // 4. Multi-IP Logic
-    let usedIps = license.used_ips || [];
-    const maxIps = license.max_ips || 1;
+    // 4. Multi-Device Logic (Reusing used_ips column as used_devices)
+    let usedDevices = license.used_ips || [];
+    const maxDevices = license.max_ips || 1;
 
-    // Check if IP is already in the list
-    if (usedIps.includes(ip)) {
+    // Check if Device is already in the list
+    if (usedDevices.includes(deviceId)) {
         return res.status(200).json({ valid: true, message: 'Access granted' });
     }
 
     // If not in list, check if we have space
-    if (usedIps.length < maxIps) {
-        // Add IP
-        usedIps.push(ip);
+    if (usedDevices.length < maxDevices) {
+        // Add Device
+        usedDevices.push(deviceId);
         const { error: updateError } = await supabase
             .from('licenses')
-            .update({ used_ips: usedIps })
+            .update({ used_ips: usedDevices }) // Keep column name 'used_ips' for compatibility
             .eq('id', license.id);
 
         if (updateError) {
-            return res.status(500).json({ valid: false, message: 'Failed to register IP' });
+            return res.status(500).json({ valid: false, message: 'Failed to register Device' });
         }
 
-        return res.status(200).json({ valid: true, message: 'Access granted (New IP registered)' });
+        return res.status(200).json({ valid: true, message: 'Access granted (New Device registered)' });
     } else {
-        return res.status(403).json({ valid: false, message: 'Max IPs reached' });
+        return res.status(403).json({ valid: false, message: 'Max Devices reached' });
     }
 }
