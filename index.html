@@ -343,9 +343,19 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
-                <input type="text" id="searchInput" placeholder="BUSCAR ALVO..."
+                <input type="text" id="searchInput" placeholder="BUSCAR CHAVE OU NOME..."
                     class="bg-transparent border-none outline-none text-sm text-gray-300 w-full placeholder-gray-600 uppercase font-mono"
                     onkeyup="filterTable()">
+                <button onclick="toggleKeyVisibility()" id="btnToggleKeys"
+                    class="p-2 text-gray-500 hover:text-white transition" title="Mostrar/Esconder Keys">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                </button>
             </div>
             <div class="flex gap-2">
                 <button onclick="filterStatus('all')"
@@ -376,6 +386,7 @@
                     <thead>
                         <tr class="text-gray-500 text-xs uppercase tracking-wider border-b border-gray-800 bg-black/40">
                             <th class="p-4 font-bold">Status</th>
+                            <th class="p-4 font-bold">Key</th>
                             <th class="p-4 font-bold">Nome</th>
                             <th class="p-4 font-bold">Whatsapp</th>
                             <th class="p-4 font-bold">Plano</th>
@@ -561,6 +572,15 @@
                     </button>
                 </div>
 
+                <div class="bg-gray-900/50 p-4 rounded border border-gray-800">
+                    <h3 class="text-yellow-500 font-bold uppercase text-xs mb-2">Reset Global</h3>
+                    <p class="text-gray-500 text-xs mb-4">Reseta o Device ID de TODAS as chaves ativas do sistema.</p>
+                    <button onclick="resetAllHWIDs()"
+                        class="w-full bg-yellow-900/20 border border-yellow-500 text-yellow-500 py-3 text-sm font-bold hover:bg-yellow-500 hover:text-black transition uppercase">
+                        ⚠️ Resetar Todos HWIDs
+                    </button>
+                </div>
+
                 <div class="flex justify-end pt-2">
                     <button onclick="closeModal('settingsModal')"
                         class="border border-gray-800 text-gray-500 px-6 py-2 text-sm hover:bg-gray-800 transition uppercase">Fechar</button>
@@ -660,6 +680,7 @@
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         let allLicenses = [];
         let activeTab = 'mine'; // 'mine' or 'resellers'
+        let areKeysVisible = false;
 
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('currentDate').innerText = new Date().toLocaleDateString('pt-BR');
@@ -801,7 +822,7 @@
             }
 
             if (filtered.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="p-12 text-center text-gray-700 uppercase text-xs tracking-widest">Nenhum dado encontrado para esta aba</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" class="p-12 text-center text-gray-700 uppercase text-xs tracking-widest">Nenhum dado encontrado para esta aba</td></tr>';
                 return;
             }
 
@@ -824,11 +845,13 @@
                 const usedIPs = lic.used_ips ? lic.used_ips.length : 0;
                 const ipStatusColor = usedIPs >= maxIPs ? 'text-red-500' : 'text-green-500';
 
-                // Fix Name Display (Admin vs Reseller)
                 const clientName = lic.client_username || lic.client_name || '---';
+                const keyDisplay = areKeysVisible ? lic.license_key : '•••••••••••••••••';
+                const keyClass = areKeysVisible ? 'text-neon-green' : 'text-gray-600';
 
                 tr.innerHTML = `
                     <td class="p-4 select-text">${statusHtml}</td>
+                    <td class="p-4 font-mono text-xs ${keyClass} select-text tracking-wider">${keyDisplay}</td>
                     <td class="p-4 font-bold text-white select-text">${clientName}</td>
                     <td class="p-4 text-gray-400 font-mono text-xs select-text">${lic.whatsapp || '---'}</td>
                     <td class="p-4 text-xs uppercase text-blue-400 select-text">${planLabel}</td>
@@ -1369,6 +1392,51 @@
                 alert('Custos atualizados com sucesso!');
                 closeModal('customCostModal');
             }
+        }
+
+        async function resetAllHWIDs() {
+            if (!confirm('PERIGO: Isso irá resetar o bloqueio de dispositivo (HWID) de TODAS as chaves ativas. Todos os usuários poderão logar em um novo dispositivo. Deseja CONTINUAR?')) return;
+
+            const btn = document.querySelector('button[onclick="resetAllHWIDs()"]');
+            const originalText = (btn) ? btn.innerHTML : 'Resetar Todos HWIDs';
+            if (btn) {
+                btn.innerHTML = 'Processando...';
+                btn.disabled = true;
+            }
+
+            // Reset used_ips for all non-expired keys
+            const { error } = await supabaseClient
+                .from('licenses')
+                .update({ used_ips: [] })
+                .neq('status', 'expired');
+
+            if (error) {
+                alert('Erro ao resetar: ' + error.message);
+                console.error(error);
+            } else {
+                alert('Todos os Device IDs foram resetados com sucesso!');
+                fetchLicenses();
+            }
+
+            if (btn) {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        function toggleKeyVisibility() {
+            areKeysVisible = !areKeysVisible;
+            const btn = document.getElementById('btnToggleKeys');
+            if (btn) {
+                if (areKeysVisible) {
+                    btn.classList.add('text-green-500');
+                    btn.classList.remove('text-gray-500');
+                } else {
+                    btn.classList.remove('text-green-500');
+                    btn.classList.add('text-gray-500');
+                }
+            }
+            renderTable(allLicenses); // Re-render logic handles the masking
         }
     </script>
 </body>
