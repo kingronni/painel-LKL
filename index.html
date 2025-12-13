@@ -250,7 +250,7 @@
                         class="glass-panel flex-1 md:flex-none px-4 py-3 text-yellow-500 border-yellow-500 hover:bg-yellow-500 hover:text-black transition font-bold text-xs md:text-sm uppercase tracking-wider hover-glow whitespace-nowrap">
                         REVENDEDORES
                     </button>
-                    <button onclick="openModal('settingsModal')"
+                    <button onclick="openModal('settingsModal'); fetchGlobalMessage()"
                         class="glass-panel flex-1 md:flex-none px-4 py-3 text-gray-400 border-gray-600 hover:bg-gray-600 hover:text-white transition font-bold text-xs md:text-sm uppercase tracking-wider hover-glow whitespace-nowrap"
                         title="Configurações">
                         ⚙️ CONFIG
@@ -552,6 +552,25 @@
             <h2 class="text-xl font-bold text-gray-300 mb-6 tracking-widest uppercase border-b border-gray-700 pb-2">
                 Configurações do Painel</h2>
             <div class="space-y-6">
+
+
+                <div class="bg-gray-900/50 p-4 rounded border border-gray-800">
+                    <h3 class="text-neon-blue font-bold uppercase text-xs mb-2">Mensagem Global (APK)</h3>
+                    <p class="text-gray-500 text-xs mb-4">Mensagem que aparece no marquee do APK.</p>
+                    <div class="mb-4">
+                        <input type="text" id="globalMessageInput" placeholder="Digite a mensagem..."
+                            class="w-full bg-black/50 border border-gray-800 text-white p-2 text-sm focus:border-neon-blue outline-none transition-colors mb-2">
+                        <div class="flex items-center gap-2">
+                            <input type="checkbox" id="globalMessageActive" class="accent-neon-blue w-4 h-4">
+                            <label for="globalMessageActive" class="text-xs text-gray-400 font-bold uppercase">Ativar
+                                Mensagem</label>
+                        </div>
+                    </div>
+                    <button onclick="saveGlobalMessage()"
+                        class="w-full bg-blue-900/20 border border-blue-500 text-blue-500 py-3 text-sm font-bold hover:bg-blue-500 hover:text-black transition uppercase">
+                        💾 Salvar Mensagem
+                    </button>
+                </div>
 
                 <div class="bg-gray-900/50 p-4 rounded border border-gray-800">
                     <h3 class="text-green-500 font-bold uppercase text-xs mb-2">Backup de Dados</h3>
@@ -1437,6 +1456,41 @@
                 }
             }
             renderTable(allLicenses); // Re-render logic handles the masking
+        }
+
+        async function fetchGlobalMessage() {
+            try {
+                const res = await fetch('/api/message');
+                const data = await res.json();
+                if (data) {
+                    document.getElementById('globalMessageInput').value = data.message || '';
+                    document.getElementById('globalMessageActive').checked = data.active || false;
+                }
+            } catch (e) {
+                console.error('Erro ao buscar mensagem global:', e);
+            }
+        }
+
+        async function saveGlobalMessage() {
+            const message = document.getElementById('globalMessageInput').value;
+            const active = document.getElementById('globalMessageActive').checked;
+
+            try {
+                const res = await fetch('/api/message', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message, active })
+                });
+
+                if (res.ok) {
+                    alert('Mensagem global atualizada com sucesso!');
+                } else {
+                    alert('Erro ao atualizar mensagem.');
+                }
+            } catch (e) {
+                console.error('Erro ao salvar mensagem:', e);
+                alert('Erro na requisição.');
+            }
         }
     </script>
 </body>

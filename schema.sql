@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS settings (
 
 -- Insert default server status if not exists
 INSERT INTO settings (key, value) VALUES ('server_status', '{"enabled": true}') ON CONFLICT DO NOTHING;
+INSERT INTO settings (key, value) VALUES ('global_message', '{"message": "Bem-vindo ao LKL XIT", "active": true}') ON CONFLICT DO NOTHING;
 
 -- Create an index on license_key for faster lookups
 CREATE INDEX IF NOT EXISTS idx_license_key ON licenses(license_key);
