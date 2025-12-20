@@ -57,7 +57,14 @@ export default async function handler(req, res) {
         // if (!allowedStatuses.includes(normalizedStatus)) { ... }
     }
 
+    // 1. DATA EXTRACTION (Improved)
     let clientName = body.client_name || body.name || (body.customer && body.customer.name) || (body.payer && body.payer.first_name);
+    // Extracao de Email do Cliente (Melhorado para varios gateways)
+    let clientEmail = body.email || body.client_email ||
+        (body.payer && body.payer.email) ||
+        (body.customer && body.customer.email) ||
+        (body.data && body.data.payer && body.data.payer.email);
+
     let clientPhone = body.whatsapp || body.phone || body.mobile || (body.customer && (body.customer.phone || body.customer.mobile)) || (body.payer && body.payer.phone && body.payer.phone.number);
     let durationInput = body.duration || body.plan || (body.product && body.product.name) || (body.additional_info && body.additional_info.items && body.additional_info.items[0] && body.additional_info.items[0].title);
 
@@ -67,14 +74,36 @@ export default async function handler(req, res) {
     // CRITICAL: If coming from Mercado Pago 'payment.created' or similar without order_id in root, try to find external_reference
     if (!orderId && body.external_reference) orderId = body.external_reference;
 
-    if (!clientName) {
-        const uniqueSuffix = Math.random().toString(36).substring(2, 6).toUpperCase();
-        clientName = `Cliente Erby ${uniqueSuffix}`;
+    // 2. NOME DO CLIENTE LOGIC
+    // Se tiver email, vamos usar o email para facilitar a identificação
+    if (clientEmail) {
+        if (clientName && clientName !== 'Cliente Site') {
+            clientName = `${clientName} (${clientEmail})`;
+        } else {
+            // Se nome for nulo ou genérico "Cliente Site", usa o email
+            clientName = clientEmail;
+        }
+    } else {
+        // Sem email
+        if (!clientName || clientName === 'Cliente Site') {
+            const uniqueSuffix = Math.random().toString(36).substring(2, 6).toUpperCase();
+            clientName = `Cliente Erby ${uniqueSuffix}`; // Fallback se nao tiver nem nome nem email
+        }
     }
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // 1. VERIFICA SE JÁ EXISTE KEY PARA ESSE PEDIDO (TRAVA DE SEGURANÇA)
+    // 3. STRICT CHECK: BLOCK MISSING ORDER ID
+    // Se nao tiver order_id, NAO cria a key. Isso impede loops infinitos de webhooks mal formatados.
+    if (!orderId) {
+        console.error('ERRO CRITICO: Webhook sem order_id (ou id). Impossivel garantir unicidade.');
+        return res.status(200).json({
+            error: 'Missing order_id (unique identifier). Payment ignored to avoid duplicates.',
+            success: false
+        });
+    }
+
+    // 4. VERIFICA SE JÁ EXISTE KEY PARA ESSE PEDIDO (TRAVA DE SEGURANÇA)
     if (orderId) {
         // First, check if this order ID already has a key
         const { data: existingKey, error: searchError } = await supabase
@@ -93,8 +122,6 @@ export default async function handler(req, res) {
                 message: 'Key recuperada do banco de dados (Idempotency)'
             });
         }
-    } else {
-        console.warn('AVISO: Webhook recebido SEM order_id. Risco de duplicidade se o gateway reenviar.');
     }
 
     // Generate Key
@@ -126,7 +153,7 @@ export default async function handler(req, res) {
 
     const { data, error } = await supabase.from('licenses').insert({
         license_key: key,
-        client_username: clientName,
+        client_username: clientName, // Agora contem o email se disponivel
         client_password: null,
         whatsapp: clientPhone || null,
         status: 'active',
